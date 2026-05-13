@@ -22,11 +22,12 @@ If the system call function mmap fails, which usually happens when there is no p
 
 Heap metadata is the "header" information stored just before an allocated memory block that allows malloc and free to function correctly. When this metadata becomes inconsistent, it is typically because the user wrote data past the end of an allocated buffer, accidentally overwriting the management data of the next block.
 If this heap metadata corruption error occurs a SIGABRT signal is sent which will return the exit code 134.
-The following message will be output to stdout just like malloc does:
-`malloc(): corrupted top size`
+The function called's name (malloc, realloc, free) followed by this message will be output to stderr:
+`heap metadata corrupted`
 
 # Notes
 
+```
 High addresses
 ┌─────────────────────┐
 │      Stack          │  ← grows downward
@@ -44,16 +45,17 @@ High addresses
 │      Text (rodata)  │  (your code)
 └─────────────────────┘
 Low addresses
+```
 
 BSS, Data and Text have a fixed size and can not be deallocated
 if a global variable is known at compile time and immutable then it will live in .rodata rather than .data.
 
-`
+```
 constexpr int x = 42;   // known + immutable              → .rodata
 int y = 42;             // known + mutable                → .data
 int z;                  // known (implicitly 0) + mutable → .bss
 int w = get_value();    // unknown + mutable              → stack or heap
-`
+```
 
 On POSIX systems mmap return MAP_FAILED on error which is defined as (void*)-1:
   (void*)-1 => this operation returns a pointer address that is not existent in memory and is used to indicate that there is an error, it is used in cases where using NULL would not be a valid way to signify that an error has occured.
