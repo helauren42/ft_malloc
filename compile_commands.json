@@ -1,0 +1,13 @@
+[
+  {
+    "file": "./tests/test0.c",
+    "arguments": [
+      "/usr/bin/cc",
+      "-g3",
+      "-I",
+      "./includes",
+      "./tests/test0.c"
+    ],
+    "directory": "/home/henri/Projects/ft_malloc"
+  }
+]
