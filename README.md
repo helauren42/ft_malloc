@@ -25,7 +25,7 @@ If this heap metadata corruption error occurs a SIGABRT signal is sent which wil
 The function called's name (malloc, realloc, free) followed by this message will be output to stderr:
 `heap metadata corrupted`
 
-# Notes
+# Notes on inner workings of Memory
 
 ```
 High addresses
@@ -60,8 +60,9 @@ int w = get_value();    // unknown + mutable              → stack or heap
 On POSIX systems mmap return MAP_FAILED on error which is defined as (void*)-1:
   (void*)-1 => this operation returns a pointer address that is not existent in memory and is used to indicate that there is an error, it is used in cases where using NULL would not be a valid way to signify that an error has occured.
 
-virtual memory maps pages to physical memory.
-mmap returns a pointer to the start of a memory page.
+- virtual memory maps pages to physical memory.
+- mmap returns a pointer to the start of a memory page it may map multiple pages on one function call and will always map a whole amount of memory pages.
+- One page is usually 4kb (4096 bytes).
 
 # Links
 

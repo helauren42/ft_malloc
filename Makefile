@@ -12,7 +12,7 @@ CFLAGS = -Wall -Wextra -Werror -g3 -fPIC
 H_FILES = -I ./includes/
 
 all: $(NAME)
-	@$(RM) $(OBJ)
+	$(MAKE) -C clean
 
 $(NAME): $(OBJS)
 	$(CC) $(OBJS) -shared -o $@

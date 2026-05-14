@@ -5,21 +5,29 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+#define DEV 1
 #define SECURE 0 // 0-1 if 1 then on free data will be zeroed
+
 #define PAGE_SIZE getpagesize()
 #define T_BLOCK_SIZE sizeof(t_block)
+#define T_FREE_BLOCK_SIZE sizeof(t_free_block)
 #define T_ZONE_SIZE sizeof(t_zone)
-
 #define TINY_ZONE_SIZE (PAGE_SIZE * 8)
 #define TINY_MAX_BYTES 128 - T_BLOCK_SIZE // 32768 / 128 = 256
 #define SMALL_ZONE_SIZE (PAGE_SIZE * 64)
 #define SMALL_MAX_BYTES 1024 - T_BLOCK_SIZE // 4096 * 64 / 1024 = 256
-#define BLOCK_MIN_SIZE sizeof(t_free_block)
+
+#define SMALL_MIN_BYTES TINY_MAX_BYTES + 1
+#define LARGE_MIN_BYTES SMALL_MAX_BYTES + 1
 
 #define MMAP_FLAGS (MAP_PRIVATE | MAP_ANONYMOUS | MAP_POPULATE)
 #define MMAP_PROT (PROT_READ | PROT_WRITE)
 
+#define PAYLOAD_SIZE(block_bytes) block_bytes - T_BLOCK_SIZE
+
 enum HEAP_TYPE { TINY, SMALL, LARGE };
+
+enum FUNCTION_CALLED { MALLOC, REALLOC, FREE };
 
 typedef struct s_global t_global;
 
@@ -28,17 +36,18 @@ typedef struct s_block t_block;
 typedef struct s_block {
   t_block *next;
   t_block *prev;
-  size_t bytes;
+  size_t payload_bytes;
   bool freed;
 } t_block;
+
 // used by hashmap
 typedef struct s_free_block t_free_block;
 
 typedef struct s_free_block {
   t_block *next;
   t_block *prev;
-  size_t bytes;
-  bool freed;
+  size_t payload_bytes;
+  bool is_free;
   t_free_block *next_free;
   t_free_block *prev_free;
 } t_free_block;
@@ -51,32 +60,44 @@ typedef struct s_zone {
   t_block *first_block;
   t_free_block *first_free_block;
   unsigned int
-      block_count; // checked on freeing to know if zone should be unmapped
-  size_t available_bytes; // check on allocation to know if the zone potentially
-                          // has a big enough block left or not but actually
-                          // first_free_block might be enough for this
+      block_count;   // checked on freeing to know if zone should be unmapped
+  size_t free_bytes; // check on allocation to know if the zone potentially
+                     // has a big enough block left or not but actually
+                     // first_free_block might be enough for this
 } t_zone;
 
 typedef struct s_global {
   t_zone *tiny_heap;
   t_zone *small_heap;
   t_zone *large_heap;
+  enum FUNCTION_CALLED function_called;
 } t_global;
 
 extern t_global global;
 
 // MAIN
-void ft_free(void *ptr);
+void free(void *ptr);
 void *malloc(size_t size);
-void *ft_realloc(void *ptr, size_t size);
+void *realloc(void *ptr, size_t size);
 
 // ZONES
 t_zone *newZone(const size_t size);
-t_zone *getLastZone(t_zone *zone);
-t_zone *getFirstZone(const enum HEAP_TYPE zone_type);
+t_zone *getFirstZone(const enum HEAP_TYPE heap_type);
+
+// BLOCKS
+t_block *getBlock(const size_t bytesNeeded);
 
 // UTILS
-enum HEAP_TYPE getZoneType(size_t bytesNeeded);
+enum HEAP_TYPE getHeapType(const size_t bytesNeeded);
+void *getAddr(t_block *block);
+
+// ERRORS
+void errorHeapMetadataCorruption();
+void errorDoubleFree();
+
+// DEBUGS
+void debugError(char *str);
+void debugInfo(char *str);
 
 // LIBFT
 int ft_strlen(char *str);
