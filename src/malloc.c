@@ -1,10 +1,11 @@
 #include "ft_malloc.h"
+#include <stdio.h>
 
-void *malloc(size_t size) {
-  write(STDOUT_FILENO, "Called malloc", ft_strlen("Called malloc"));
+void *ft_malloc(size_t size) {
+  debugInfo("Called malloc");
   global.function_called = MALLOC;
   t_block *block = getBlock(size);
   if (!block)
-    return NULL;
+    return debugInfo("block not found"), NULL;
   return getAddr(block);
 }

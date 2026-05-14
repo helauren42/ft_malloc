@@ -1,5 +1,6 @@
 #include "ft_malloc.h"
 #include <stddef.h>
+#include <stdio.h>
 #include <unistd.h>
 
 /*
@@ -51,10 +52,18 @@ static t_block *unfreeBlock(const size_t bytesNeeded, t_free_block *curr_block,
 t_block *getBlock(const size_t bytesNeeded) {
   const enum HEAP_TYPE heap_type = getHeapType(bytesNeeded);
   t_zone *firstZone = getFirstZone(heap_type);
+  printf("expecting nile: %p\n", (void *)firstZone);
   // if there is no first zone create a new zone and check it worked
-  if ((!firstZone && !newZone(bytesNeeded)) ||
-      (firstZone = getFirstZone(heap_type)))
-    return NULL;
+  if (!firstZone) {
+    debugInfo("there");
+    if (!newZone(bytesNeeded))
+      return debugError("Failed to create new zone\n"), NULL;
+    firstZone = getFirstZone(heap_type);
+    printf("expecting some pointer value: %p\n", (void *)firstZone);
+    if (!firstZone)
+      return debugError("get first zone returned null when newZone succeeded"),
+             NULL;
+  }
   // iterate through zones
   t_zone *zone = firstZone;
   while (zone) {

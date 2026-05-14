@@ -21,7 +21,7 @@ $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) $(H_FILES) -c $< -o $@
 
 clean:
-	$(RM) $(OBJ)
+	$(RM) $(OBJS)
 
 fclean: clean
 	$(RM) $(NAME)
@@ -29,7 +29,9 @@ fclean: clean
 re: fclean all
 
 # TODO add test later where it actually uses .so
+# dev: $(NAME)
+# 	$(CC) -g3 -I ./includes ./tests/test0.c -L. -lft_malloc && ./a.out && $(RM) a.out
 dev: $(NAME)
-	$(CC) -g3 -I ./includes ./tests/test0.c -L. -lft_malloc && ./a.out && $(RM) a.out
+	$(CC) -g3 -I ./includes ./tests/test0.c -L. -lft_malloc -Wl,-rpath,. && ./a.out && $(RM) a.out
 
 .PHONY: all clean fclean re

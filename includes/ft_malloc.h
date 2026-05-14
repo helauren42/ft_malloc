@@ -67,9 +67,12 @@ typedef struct s_zone {
 } t_zone;
 
 typedef struct s_global {
-  t_zone *tiny_heap;
-  t_zone *small_heap;
-  t_zone *large_heap;
+  t_zone *tiny_first;
+  t_zone *small_first;
+  t_zone *large_first;
+  t_zone *tiny_last;
+  t_zone *small_last;
+  t_zone *large_last;
   enum FUNCTION_CALLED function_called;
 } t_global;
 
@@ -77,7 +80,7 @@ extern t_global global;
 
 // MAIN
 void free(void *ptr);
-void *malloc(size_t size);
+void *ft_malloc(size_t size);
 void *realloc(void *ptr, size_t size);
 
 // ZONES

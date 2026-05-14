@@ -1,5 +1,6 @@
 #include "ft_malloc.h"
 #include <stdlib.h>
+#include <unistd.h>
 
 static void writeStderr(char *str) {
   write(STDERR_FILENO, str, ft_strlen(str));
@@ -17,6 +18,8 @@ void errorHeapMetadataCorruption() {
   case FREE:
     writeStderr("free(): heap metadata corrupted");
     break;
+  default:
+    debugError("errorHeapMetadataCorruption default case");
   }
   abort();
 }
