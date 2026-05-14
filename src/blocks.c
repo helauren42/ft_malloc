@@ -27,9 +27,9 @@ static t_block *unfreeBlock(const size_t bytesNeeded, t_free_block *curr_block,
   if (split_block) {
     // new free block
     t_free_block *new_free_block =
-        (void *)(curr_block) + curr_block->payload_bytes + T_BLOCK_SIZE;
+        (void *)(curr_block) + T_BLOCK_SIZE + bytesNeeded;
     new_free_block->next = curr_block->next;
-    new_free_block->prev = curr_block->prev;
+    new_free_block->prev = (void *)curr_block;
     new_free_block->payload_bytes = extra_bytes - T_BLOCK_SIZE;
     new_free_block->is_free = true, new_free_block->next_free = next_free;
     new_free_block->prev_free = prev_free;
@@ -39,6 +39,7 @@ static t_block *unfreeBlock(const size_t bytesNeeded, t_free_block *curr_block,
       prev_free->next_free = new_free_block;
     // curr block
     curr_block->payload_bytes -= extra_bytes;
+    curr_block->next = (void *)new_free_block;
   } else {
     if (!prev_free)
       zone->first_free_block = next_free;

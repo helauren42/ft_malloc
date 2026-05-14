@@ -19,7 +19,7 @@ void defragment(t_zone *zone) {
 void free(void *ptr) {
   if (!ptr)
     return;
-  global.function_called = MALLOC;
+  global.function_called = FREE;
   printf("Freeing '%p'\n", ptr);
   munmap(ptr, 1);
 }

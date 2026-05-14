@@ -92,8 +92,7 @@ inline static void appendNewZone(t_zone *new_zone,
   if (*last_zone) {
     (*last_zone)->next = new_zone;
     new_zone->prev = *last_zone;
-  }
-  if (!(*first_zone)) {
+  } else {
     *first_zone = new_zone;
   }
   *last_zone = new_zone;
