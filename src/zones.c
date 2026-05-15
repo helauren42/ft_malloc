@@ -3,16 +3,16 @@
 #include <stdio.h>
 #include <sys/mman.h>
 
-t_global global = {NULL, NULL, NULL, NULL, NULL, NULL, 0};
+t_heaps g_heaps = {NULL, NULL, NULL, NULL, NULL, NULL, 0};
 
 inline static t_zone **getLastZone(const enum HEAP_TYPE heap_type) {
   switch (heap_type) {
   case TINY:
-    return &global.tiny_last;
+    return &g_heaps.tiny_last;
   case SMALL:
-    return &global.small_last;
+    return &g_heaps.small_last;
   case LARGE:
-    return &global.large_last;
+    return &g_heaps.large_last;
   default:
     debugError("getFirstZone default case");
     return NULL;
@@ -22,11 +22,11 @@ inline static t_zone **getLastZone(const enum HEAP_TYPE heap_type) {
 inline t_zone *getFirstZone(const enum HEAP_TYPE heap_type) {
   switch (heap_type) {
   case TINY:
-    return global.tiny_first;
+    return g_heaps.tiny_first;
   case SMALL:
-    return global.small_first;
+    return g_heaps.small_first;
   case LARGE:
-    return global.large_first;
+    return g_heaps.large_first;
   default:
     debugError("getFirstZone default case");
     return NULL;
@@ -45,8 +45,10 @@ inline static t_zone *newLimitedZone(const enum HEAP_TYPE heap_type) {
 inline static void initNewZone(t_zone *new_zone,
                                const enum HEAP_TYPE heap_type) {
   // new zone
+  new_zone->heap_type = heap_type;
   new_zone->next = NULL;
-  new_zone->block_count = 0;
+  new_zone->prev = NULL; // prev is set inside appendNewZone
+  new_zone->active_block_count = 0;
   new_zone->first_free_block = (void *)(new_zone + 1);
   // first_free_block
   t_free_block *first_free_block = new_zone->first_free_block;
@@ -77,16 +79,16 @@ inline static void appendNewZone(t_zone *new_zone,
   t_zone **first_zone;
   switch (heap_type) {
   case TINY:
-    last_zone = &global.tiny_last;
-    first_zone = &global.tiny_first;
+    last_zone = &g_heaps.tiny_last;
+    first_zone = &g_heaps.tiny_first;
     break;
   case SMALL:
-    last_zone = &global.small_last;
-    first_zone = &global.small_first;
+    last_zone = &g_heaps.small_last;
+    first_zone = &g_heaps.small_first;
     break;
   case LARGE:
-    last_zone = &global.large_last;
-    first_zone = &global.large_first;
+    last_zone = &g_heaps.large_last;
+    first_zone = &g_heaps.large_first;
     break;
   }
   if (*last_zone) {
@@ -96,8 +98,8 @@ inline static void appendNewZone(t_zone *new_zone,
     *first_zone = new_zone;
   }
   *last_zone = new_zone;
-  printf("result first: %p\n", global.tiny_first);
-  printf("result last: %p\n", global.tiny_last);
+  printf("result first: %p\n", g_heaps.tiny_first);
+  printf("result last: %p\n", g_heaps.tiny_last);
 }
 
 inline t_zone *newZone(const size_t size) {

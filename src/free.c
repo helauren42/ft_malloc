@@ -2,24 +2,24 @@
 #include <stdio.h>
 #include <sys/mman.h>
 
-void defragment(t_zone *zone) {
-  t_block *block = zone->first_block;
-  while (block->next) {
-    if (block->freed && block->next->freed) {
-      // merge blocks
-      block->payload_bytes += block->next->payload_bytes;
-      // TODO remove next block somehow
-      block->next += block->payload_bytes;
-      if (SECURE) {
-      }
-    }
+inline static void mergeBlocks(t_block *block, t_block *next) {
+  if (next && next->is_free) {
+    block->payload_bytes += next->payload_bytes + T_BLOCK_SIZE;
   }
 }
 
 void free(void *ptr) {
   if (!ptr)
     return;
-  global.function_called = FREE;
+  debugInfo("Called free");
+  g_heaps.function_called = FREE;
+  t_block *block = getHeaderAddr(ptr);
+  block->is_free = true;
+  t_block *next = block->next;
+  mergeBlocks(block, next);
   printf("Freeing '%p'\n", ptr);
-  munmap(ptr, 1);
+  t_zone *zone = block->zone;
+  zone->active_block_count--;
+  if (zone->active_block_count == 0)
+    munmap(zone, 1);
 }

@@ -11,5 +11,8 @@ int main() {
   strcpy(s2, "s2 Hello World");
   printf("%s\n", s2);
   printf("%p\n", s2);
+  free(str);
+  show_alloc_mem_ex();
+  printf("%s\n", str);
   return 0;
 }

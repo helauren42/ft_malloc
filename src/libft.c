@@ -1,6 +1,6 @@
 #include "ft_malloc.h"
 
-void ft_bzero(void *dst, size_t n) {
+void ft_bzero(void *dst, const size_t n) {
   unsigned int i;
 
   i = 0;
@@ -10,7 +10,7 @@ void ft_bzero(void *dst, size_t n) {
   }
 }
 
-int ft_strlen(char *str) {
+int ft_strlen(const char *str) {
   int i;
 
   i = 0;

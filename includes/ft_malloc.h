@@ -2,6 +2,7 @@
 #define FT_MALLOC
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
@@ -29,44 +30,44 @@ enum HEAP_TYPE { TINY, SMALL, LARGE };
 
 enum FUNCTION_CALLED { MALLOC, REALLOC, FREE };
 
-typedef struct s_global t_global;
-
+typedef struct s_heaps t_heaps;
 typedef struct s_block t_block;
+typedef struct s_free_block t_free_block;
+typedef struct s_zone t_zone;
 
 typedef struct s_block {
   t_block *next;
   t_block *prev;
+  t_zone *zone;
   size_t payload_bytes;
-  bool freed;
+  bool is_free;
 } t_block;
-
-// used by hashmap
-typedef struct s_free_block t_free_block;
 
 typedef struct s_free_block {
   t_block *next;
   t_block *prev;
+  void *zone;
   size_t payload_bytes;
   bool is_free;
   t_free_block *next_free;
   t_free_block *prev_free;
 } t_free_block;
 
-typedef struct s_zone t_zone;
-
 typedef struct s_zone {
+  enum HEAP_TYPE heap_type;
   t_zone *prev;
   t_zone *next;
   t_block *first_block;
   t_free_block *first_free_block;
-  unsigned int
-      block_count;   // checked on freeing to know if zone should be unmapped
+  unsigned int active_block_count; // checked on freeing to know if zone should
+                                   // be unmapped
+  size_t size;
   size_t free_bytes; // check on allocation to know if the zone potentially
                      // has a big enough block left or not but actually
                      // first_free_block might be enough for this
 } t_zone;
 
-typedef struct s_global {
+typedef struct s_heaps {
   t_zone *tiny_first;
   t_zone *small_first;
   t_zone *large_first;
@@ -74,25 +75,28 @@ typedef struct s_global {
   t_zone *small_last;
   t_zone *large_last;
   enum FUNCTION_CALLED function_called;
-} t_global;
+} t_heaps;
 
-extern t_global global;
+extern t_heaps g_heaps;
 
 // MAIN
 void free(void *ptr);
 void *ft_malloc(size_t size);
 void *realloc(void *ptr, size_t size);
+void show_alloc_mem_ex();
 
 // ZONES
 t_zone *newZone(const size_t size);
 t_zone *getFirstZone(const enum HEAP_TYPE heap_type);
 
 // BLOCKS
-t_block *getBlock(const size_t bytesNeeded);
+t_block *allocBlock(const size_t bytesNeeded);
 
 // UTILS
 enum HEAP_TYPE getHeapType(const size_t bytesNeeded);
-void *getAddr(t_block *block);
+t_zone *getHeapStart(const enum HEAP_TYPE heap_type);
+void *getPayloadAddr(t_block *block);
+t_block *getHeaderAddr(void *payload);
 
 // ERRORS
 void errorHeapMetadataCorruption();
@@ -103,7 +107,14 @@ void debugError(char *str);
 void debugInfo(char *str);
 
 // LIBFT
-int ft_strlen(char *str);
-void ft_bzero(void *dst, size_t n);
+int ft_strlen(const char *str);
+void ft_bzero(void *dst, const size_t n);
+void ft_putnbr_fd(long n, int fd);
+void ft_putsize_t(size_t n, int fd);
+
+// PRINT
+void printLine(const char *str);
+void printStr(const char *str);
+void printAddr(void *addr);
 
 #endif
