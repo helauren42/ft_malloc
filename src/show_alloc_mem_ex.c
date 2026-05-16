@@ -13,28 +13,32 @@ typedef struct s_mem_usage {
 } t_mem_usage;
 
 inline static void printBlockTitle(const unsigned int count) {
-  write(1, "  Block", 4);
+  write(1, "  ", 2);
   ft_putnbr_fd(count, 1);
   write(1, ": ", 2);
+}
+
+inline static void printBlock(const unsigned int count, const t_block *block) {
+  printBlockTitle(count);
+  printAddr(block, false);
+  printStr(" - ");
+  printAddr(block + block->payload_bytes, false);
+  printStr(" : ");
+  ft_putsize_t(block->payload_bytes, 1);
+  printLine("");
 }
 
 inline static size_t printBlocks(t_block *block) {
   unsigned int i = 0;
   size_t bytes_used = 0;
-  if (block == NULL)
-    printLine("is null");
   while (block) {
-    printLine("HERE1");
+    printStr("considering: ");
+    printAddr(block, true);
     if (!block->is_free) {
-      printLine("HERE");
-      bytes_used += block->payload_bytes + T_BLOCK_SIZE;
-      printBlockTitle(i);
-      printStr("  ");
-      printAddr(block);
+      bytes_used += block->payload_bytes;
+      printBlock(i, block);
     }
     block = block->next;
-    printLine("next block: ");
-    printAddr(block);
     i++;
   }
   return bytes_used;
@@ -78,8 +82,7 @@ inline static t_mem_usage printZones(t_zone *zone,
   size_t bytes_mapped = 0;
   while (zone) {
     printZoneTitle(i);
-    printAddr(zone);
-    printStr("loop in zone");
+    printAddr(zone, true);
     bytes_used += printBlocks(zone->first_block);
     bytes_mapped += getZoneSize(zone, heap_type);
     printStr("\n");

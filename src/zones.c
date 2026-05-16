@@ -98,14 +98,11 @@ inline static void appendNewZone(t_zone *new_zone,
     *first_zone = new_zone;
   }
   *last_zone = new_zone;
-  printf("result first: %p\n", g_heaps.tiny_first);
-  printf("result last: %p\n", g_heaps.tiny_last);
 }
 
 inline t_zone *newZone(const size_t size) {
   const enum HEAP_TYPE heap_type = getHeapType(size);
   // creating new zone
-  debugInfo("creating new zone");
   t_zone *new_zone;
   if (heap_type == LARGE) {
     new_zone = mmap(NULL, size, MMAP_PROT, MMAP_FLAGS, -1, 0);
@@ -115,7 +112,6 @@ inline t_zone *newZone(const size_t size) {
   if (new_zone == MAP_FAILED)
     return debugError("map failed bruhh"), NULL;
   // appending new zone to list of zones
-  debugInfo("still creating new zone");
   initNewZone(new_zone, heap_type);
   appendNewZone(new_zone, heap_type);
   return new_zone;

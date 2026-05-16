@@ -14,10 +14,11 @@ void free(void *ptr) {
   debugInfo("Called free");
   g_heaps.function_called = FREE;
   t_block *block = getHeaderAddr(ptr);
+  printStr("Freeding this addr:");
+  printAddr(block, true);
   block->is_free = true;
   t_block *next = block->next;
   mergeBlocks(block, next);
-  printf("Freeing '%p'\n", ptr);
   t_zone *zone = block->zone;
   zone->active_block_count--;
   if (zone->active_block_count == 0)

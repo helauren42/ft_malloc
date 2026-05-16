@@ -64,7 +64,7 @@ static const char *HEX[256] = {
 
 static inline void printHex(const uint8_t num) { write(1, HEX[num], 2); }
 
-inline void printAddr(void *addr) {
+inline void printAddr(const void *addr, const bool newline) {
   write(1, "0x", 2);
 
   uint8_t *bytes = (uint8_t *)&addr;
@@ -78,5 +78,6 @@ inline void printAddr(void *addr) {
     printHex(bytes[i]);
   }
 
-  write(1, "\n", 1);
+  if (newline)
+    write(1, "\n", 1);
 }

@@ -115,6 +115,6 @@ void ft_putsize_t(size_t n, int fd);
 // PRINT
 void printLine(const char *str);
 void printStr(const char *str);
-void printAddr(void *addr);
+void printAddr(const void *addr, const bool newline);
 
 #endif
