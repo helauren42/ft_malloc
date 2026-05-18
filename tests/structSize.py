@@ -7,10 +7,7 @@ def getAllStructs()-> list[str]:
     start = f"typedef struct s_"
     definition: list[str] = []
     inStructDef = False
-    print(1)
-    print(utils.C_FILE_CONTENT)
     for line in utils.C_FILE_CONTENT:
-        print(line)
         if line.find(start) >= 0:
             inStructDef = True
         if inStructDef:

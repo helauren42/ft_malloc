@@ -28,7 +28,7 @@ fclean: clean
 re: fclean all
 
 dev: $(NAME)
-	$(CC) -g3 -I ./includes ./tests/src/test0.c -L. -lft_malloc -Wl,-rpath,. && ./a.out && $(RM) a.out
+	$(CC) -g3 -I ./includes ./tests/dev/main.c -L. -lft_malloc -Wl,-rpath,. && ./a.out && $(RM) a.out
 
 # TODO add test later where it actually uses .so
 # dev: $(NAME)

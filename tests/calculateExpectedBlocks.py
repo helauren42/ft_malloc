@@ -21,7 +21,7 @@ def getAllocs(filename: str):
         pos = line.find("=")
         return line[:pos].strip().split(" ")[-1].strip(" *")
 
-    path = f"./src/{filename}"
+    path = f"./{filename}"
     with open(path, "r") as f:
         lines = f.readlines()
         utils.C_FILE_CONTENT = lines
@@ -69,3 +69,4 @@ def calculateExpectedBlocks(filename: str):
     getAllocs(filename)
     expectedBlocks = sortAllocs(zoneMax)
     return expectedBlocks
+

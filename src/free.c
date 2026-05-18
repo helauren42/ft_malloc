@@ -1,5 +1,4 @@
 #include "ft_malloc.h"
-#include <stdio.h>
 #include <sys/mman.h>
 
 inline static void mergeBlocks(t_block *block, t_block *next) {
@@ -11,7 +10,6 @@ inline static void mergeBlocks(t_block *block, t_block *next) {
 void free(void *ptr) {
   if (!ptr)
     return;
-  debugInfo("Called free");
   g_heaps.function_called = FREE;
   t_block *block = getHeaderAddr(ptr);
   printStr("Freeding this addr:");

@@ -3,10 +3,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-/*
- * Returns the min size of the payload of the new allocated free block to create
- * a new free block out of it, it includes the header size in the returned value
- */
 inline static size_t NewFreeBlockMinSize(const enum HEAP_TYPE heap_type) {
   static const size_t sizes[LARGE + 1] = {[TINY] = T_FREE_BLOCK_SIZE,
                                           [SMALL] = SMALL_MIN_PAYLOAD,
@@ -16,13 +12,11 @@ inline static size_t NewFreeBlockMinSize(const enum HEAP_TYPE heap_type) {
 
 static inline void setFirstFreeBlock(t_zone *g_heaps, t_zone *zone,
                                      t_free_block *new_free_block) {
-  printLine("SETTING FIRST BLOCK");
   zone->first_free_block = new_free_block;
   g_heaps->first_free_block = new_free_block;
 }
 
 static inline void setFirstBlock(t_zone *g_heaps, t_block *curr_block) {
-  printLine("I GUESS THERE WAS NONE");
   g_heaps->first_block = (t_block *)curr_block;
 }
 
