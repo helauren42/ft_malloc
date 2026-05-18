@@ -2,7 +2,15 @@
 #include <stdio.h>
 #include <string.h>
 
+typedef struct s_nest {
+  void *anything_else;
+  void *something_else;
+  char d;
+  int a;
+} t_nest;
+
 typedef struct s_test {
+  t_nest *nest;
   void *anything;
   void *something;
   char c;
@@ -19,6 +27,7 @@ int main() {
   strcpy(s2, "s2 Hello World");
   printf("expecting %p\n", (void *)str - T_BLOCK_SIZE);
   printf("expecting %p\n", (void *)s2 - T_BLOCK_SIZE);
+  t_nest *nest = ft_malloc(sizeof(t_nest));
   t_test *test = ft_malloc(sizeof(t_test));
   show_alloc_mem_ex();
   return 0;

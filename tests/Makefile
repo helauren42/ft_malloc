@@ -1,3 +1,5 @@
+MAKEFLAGS += --no-print-directory
+
 VENV=venv
 REQUIREMENTS=requirements.txt
 PIP=venv/bin/pip

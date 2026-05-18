@@ -2,7 +2,6 @@
 #include <stdio.h>
 
 void *ft_malloc(size_t size) {
-  debugInfo("Called malloc");
   g_heaps.function_called = MALLOC;
   t_block *block = allocBlock(size);
   if (!block)

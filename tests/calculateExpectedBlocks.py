@@ -1,5 +1,5 @@
+import utils
 from parseAllocAmount import allocAmount
-from utils import C_FILE_CONTENT, FILENAME
 
 allocs: dict[str,int] = {}
 
@@ -14,8 +14,8 @@ def handleFree(line: str):
     allocs.pop(varName)
 
 def getAllocs(filename: str):
-    global allocs, C_FILE_CONTENT, FILENAME
-    FILENAME = filename
+    global allocs
+    utils.FILENAME = filename
     allocs = {}
     def getVarName(line: str)-> str:
         pos = line.find("=")
@@ -24,7 +24,7 @@ def getAllocs(filename: str):
     path = f"./src/{filename}"
     with open(path, "r") as f:
         lines = f.readlines()
-        C_FILE_CONTENT = lines
+        utils.C_FILE_CONTENT = lines
         for line in lines:
             mallocStart = line.find("malloc(")
             if mallocStart < 0:

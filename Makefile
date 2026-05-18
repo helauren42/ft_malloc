@@ -12,7 +12,6 @@ CFLAGS = -Wall -Wextra -Werror -g3 -fPIC
 H_FILES = -I ./includes/
 
 all: $(NAME)
-	$(MAKE) -C clean
 
 $(NAME): $(OBJS)
 	$(CC) $(OBJS) -shared -o $@
@@ -28,10 +27,13 @@ fclean: clean
 
 re: fclean all
 
+dev: $(NAME)
+	$(CC) -g3 -I ./includes ./tests/src/test0.c -L. -lft_malloc -Wl,-rpath,. && ./a.out && $(RM) a.out
+
 # TODO add test later where it actually uses .so
 # dev: $(NAME)
 # 	$(CC) -g3 -I ./includes ./tests/test0.c -L. -lft_malloc && ./a.out && $(RM) a.out
-dev: $(NAME)
-	$(CC) -g3 -I ./includes ./tests/test0.c -L. -lft_malloc -Wl,-rpath,. && ./a.out && $(RM) a.out
+test: $(NAME)
+	$(MAKE) -C tests run
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re dev tests

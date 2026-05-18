@@ -9,8 +9,8 @@
  */
 inline static size_t NewFreeBlockMinSize(const enum HEAP_TYPE heap_type) {
   static const size_t sizes[LARGE + 1] = {[TINY] = T_FREE_BLOCK_SIZE,
-                                          [SMALL] = SMALL_MIN_BYTES,
-                                          [LARGE] = LARGE_MIN_BYTES};
+                                          [SMALL] = SMALL_MIN_PAYLOAD,
+                                          [LARGE] = LARGE_MIN_PAYLOAD};
   return sizes[heap_type];
 }
 

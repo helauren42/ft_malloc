@@ -10,16 +10,18 @@
 #define SECURE 0 // 0-1 if 1 then on free data will be zeroed
 
 #define PAGE_SIZE getpagesize()
-#define T_BLOCK_SIZE sizeof(t_block)
+#define T_BLOCK_SIZE sizeof(t_block) // 40 bytes
 #define T_FREE_BLOCK_SIZE sizeof(t_free_block)
 #define T_ZONE_SIZE sizeof(t_zone)
 #define TINY_ZONE_SIZE (PAGE_SIZE * 8)
-#define TINY_MAX_BYTES 128 - T_BLOCK_SIZE // 32768 / 128 = 256
-#define SMALL_ZONE_SIZE (PAGE_SIZE * 64)
-#define SMALL_MAX_BYTES 1024 - T_BLOCK_SIZE // 4096 * 64 / 1024 = 256
+#define TINY_MAX_PAYLOAD 128
+// max number of blocks is TINY_ZONE_SIZE / (TINY_MAX_PAYLOAD +
+// T_BLOCK_SIZE) ~ 32768 / (128 + 40) = 195
+#define SMALL_ZONE_SIZE (PAGE_SIZE * 64) // 64
+#define SMALL_MAX_PAYLOAD 1024
 
-#define SMALL_MIN_BYTES TINY_MAX_BYTES + 1
-#define LARGE_MIN_BYTES SMALL_MAX_BYTES + 1
+#define SMALL_MIN_PAYLOAD TINY_MAX_PAYLOAD + 1
+#define LARGE_MIN_PAYLOAD SMALL_MAX_PAYLOAD + 1
 
 #define MMAP_FLAGS (MAP_PRIVATE | MAP_ANONYMOUS | MAP_POPULATE)
 #define MMAP_PROT (PROT_READ | PROT_WRITE)

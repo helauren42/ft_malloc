@@ -32,8 +32,8 @@ inline static size_t printBlocks(t_block *block) {
   unsigned int i = 0;
   size_t bytes_used = 0;
   while (block) {
-    printStr("considering: ");
-    printAddr(block, true);
+    // printStr("considering: ");
+    // printAddr(block, true);
     if (!block->is_free) {
       bytes_used += block->payload_bytes;
       printBlock(i, block);
@@ -85,7 +85,6 @@ inline static t_mem_usage printZones(t_zone *zone,
     printAddr(zone, true);
     bytes_used += printBlocks(zone->first_block);
     bytes_mapped += getZoneSize(zone, heap_type);
-    printStr("\n");
     ft_putsize_t(bytes_mapped, 1);
     printStr("\n");
     ft_putsize_t(bytes_used, 1);
@@ -121,6 +120,7 @@ void show_alloc_mem_ex() {
   printLine("------------ LARGE HEAP ------------");
   toAdd = printZones(g_heaps.large_first, LARGE);
   totalMem = addMem(totalMem, toAdd);
+  printLine("------------ HEAP END ------------");
   printStr("Total Bytes Mapped: ");
   ft_putsize_t(totalMem.bytes_mapped, 1);
   printStr("\n");
