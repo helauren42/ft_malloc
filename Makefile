@@ -1,6 +1,6 @@
 NAME = libft_malloc.so
 
-SRCS := $(wildcard src/*.c)
+SRCS := src/free.c src/internal/blocks.c src/internal/debug.c src/internal/errors.c src/internal/libft.c src/internal/print.c src/internal/utils.c src/internal/zones.c src/malloc.c src/show_alloc_mem_ex.c
 SRC_DIR=src/
 OBJS = $(SRCS:.c=.o)
 
@@ -26,6 +26,9 @@ fclean: clean
 	$(RM) $(NAME)
 
 re: fclean all
+
+update_source:
+	python ./scripts/update_makefile_srcs.py
 
 dev: $(NAME)
 	$(CC) -g3 -I ./includes ./tests/dev/main.c -L. -lft_malloc -Wl,-rpath,. && ./a.out && $(RM) a.out

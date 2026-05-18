@@ -32,6 +32,7 @@ def matchBlocksSize(blocksSizes: list[int], expected: list[int]):
 def processBlocks(out: str, expectedBlocks: tuple[list[int], list[int], list[int]]):
     lines = out.splitlines(keepends=True)
     i = 0
+    print("!!",lines)
     while lines[i] != "------------ TINY HEAP ------------\n":
         i += 1
     tiny_heap_start = i+1
