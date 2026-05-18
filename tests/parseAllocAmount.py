@@ -1,8 +1,6 @@
-import re
-
 from structSize import getStructSize
 
-OPPERATORS = "*+-()"
+OPPERATORS = "*+-"
 
 def retrieveSize(element: str) -> int:
     element = element.strip()
@@ -47,14 +45,12 @@ def hasOperators(input: str)-> bool:
     return False
 
 def allocAmount(input: str)-> int:
-    global filename
     if hasOperators(input) is False:
-        return int(input.strip())
+        return int(input.strip()) if not input.startswith("sizeof(") else retrieveSize(input[7:-1])
     parts = input.split(" ")
     # should probably do some recusive computation to calculate the amount instead of just handling len 1 or len 3
     if len(parts) != 3:
         raise ValueError(f"Nah not handling this: {parts}")
-    print(parts)
     elements = []
     for i in range(len(parts)):
         parts[i] = parts[i].strip()
@@ -72,4 +68,6 @@ def allocAmount(input: str)-> int:
 if __name__ == "__main__":
     print("test 5: ", allocAmount("5"))
     print("test 'sizeof(int) * 5': ", allocAmount("sizeof(int) * 5"))
+    print("test 'sizeof(char*) * 5': ", allocAmount("sizeof(char*) * 5"))
+    print("test 'sizeof(char**) * 5': ", allocAmount("sizeof(char**) * 5"))
 
