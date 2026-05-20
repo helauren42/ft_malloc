@@ -3,30 +3,30 @@
 #include <stdio.h>
 #include <sys/mman.h>
 
-t_heaps g_heaps = {NULL, NULL, NULL, NULL, NULL, NULL, 0};
+t_heaps g_global = {NULL, NULL, NULL, NULL, NULL, NULL, 0};
 
 inline static t_zone **getLastZone(const enum HEAP_TYPE heap_type) {
   switch (heap_type) {
   case TINY:
-    return &g_heaps.tiny_last;
+    return &g_global.tiny_last;
   case SMALL:
-    return &g_heaps.small_last;
+    return &g_global.small_last;
   case LARGE:
-    return &g_heaps.large_last;
+    return &g_global.large_last;
   default:
     debugError("getFirstZone default case");
     return NULL;
   }
 }
 
-inline t_zone *getFirstZone(const enum HEAP_TYPE heap_type) {
+inline t_zone **getFirstZone(const enum HEAP_TYPE heap_type) {
   switch (heap_type) {
   case TINY:
-    return g_heaps.tiny_first;
+    return &g_global.tiny_first;
   case SMALL:
-    return g_heaps.small_first;
+    return &g_global.small_first;
   case LARGE:
-    return g_heaps.large_first;
+    return &g_global.large_first;
   default:
     debugError("getFirstZone default case");
     return NULL;
@@ -79,16 +79,16 @@ inline static void appendNewZone(t_zone *new_zone,
   t_zone **first_zone;
   switch (heap_type) {
   case TINY:
-    last_zone = &g_heaps.tiny_last;
-    first_zone = &g_heaps.tiny_first;
+    last_zone = &g_global.tiny_last;
+    first_zone = &g_global.tiny_first;
     break;
   case SMALL:
-    last_zone = &g_heaps.small_last;
-    first_zone = &g_heaps.small_first;
+    last_zone = &g_global.small_last;
+    first_zone = &g_global.small_first;
     break;
   case LARGE:
-    last_zone = &g_heaps.large_last;
-    first_zone = &g_heaps.large_first;
+    last_zone = &g_global.large_last;
+    first_zone = &g_global.large_first;
     break;
   }
   if (*last_zone) {
@@ -115,4 +115,19 @@ inline t_zone *newZone(const size_t size) {
   initNewZone(new_zone, heap_type);
   appendNewZone(new_zone, heap_type);
   return new_zone;
+}
+
+inline void removeZone(t_block *block, t_zone *zone) {
+  t_zone *prev = zone->prev;
+  t_zone *next = zone->next;
+  if (prev) {
+    prev->next = next;
+  } else {
+    t_zone **zone = getFirstZone(getHeapType(block->payload_bytes));
+    if (next)
+      (*zone) = next;
+    else
+      (*zone) = NULL;
+  }
+  munmap(zone, T_ZONE_SIZE);
 }

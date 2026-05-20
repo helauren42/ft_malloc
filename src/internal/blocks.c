@@ -10,14 +10,14 @@ inline static size_t NewFreeBlockMinSize(const enum HEAP_TYPE heap_type) {
   return sizes[heap_type];
 }
 
-static inline void setFirstFreeBlock(t_zone *g_heaps, t_zone *zone,
+static inline void setFirstFreeBlock(t_zone *g_global, t_zone *zone,
                                      t_free_block *new_free_block) {
   zone->first_free_block = new_free_block;
-  g_heaps->first_free_block = new_free_block;
+  g_global->first_free_block = new_free_block;
 }
 
-static inline void setFirstBlock(t_zone *g_heaps, t_block *curr_block) {
-  g_heaps->first_block = (t_block *)curr_block;
+static inline void setFirstBlock(t_zone *g_global, t_block *curr_block) {
+  g_global->first_block = (t_block *)curr_block;
 }
 
 // TODO check for heap metadata corruption
@@ -25,7 +25,7 @@ static t_block *unfreeBlock(const size_t bytesNeeded, t_free_block *curr_block,
                             t_zone *zone, const enum HEAP_TYPE heap_type) {
   const size_t extra_bytes = curr_block->payload_bytes - bytesNeeded;
   const bool split_block = extra_bytes >= NewFreeBlockMinSize(heap_type);
-  t_zone *g_heaps = getHeapStart(heap_type);
+  t_zone *g_global = getHeapStart(heap_type);
   // if true we need to create new free block from the memory space that is left
   // otherwise the block will be bigger than what has been requested
   curr_block->is_free = false;
@@ -44,21 +44,21 @@ static t_block *unfreeBlock(const size_t bytesNeeded, t_free_block *curr_block,
     new_free_block->next_free = next_free;
 
     if (!prev_free) {
-      setFirstFreeBlock(g_heaps, zone, new_free_block);
+      setFirstFreeBlock(g_global, zone, new_free_block);
     } else
       prev_free->next_free = new_free_block;
     if (!curr_block->prev)
-      setFirstBlock(g_heaps, (t_block *)curr_block);
+      setFirstBlock(g_global, (t_block *)curr_block);
     // curr block
     curr_block->payload_bytes -= extra_bytes;
     curr_block->next = (void *)new_free_block;
   } else {
     if (!prev_free) {
-      setFirstFreeBlock(g_heaps, zone, next_free);
+      setFirstFreeBlock(g_global, zone, next_free);
     } else
       prev_free->next_free = next_free;
     if (!curr_block->prev)
-      setFirstBlock(g_heaps, (t_block *)curr_block);
+      setFirstBlock(g_global, (t_block *)curr_block);
   }
   printStr("UNFREED: ");
   printAddr(curr_block, true);
@@ -68,12 +68,12 @@ static t_block *unfreeBlock(const size_t bytesNeeded, t_free_block *curr_block,
 // TODO incr zone block count on successfull call
 t_block *allocBlock(const size_t bytesNeeded) {
   const enum HEAP_TYPE heap_type = getHeapType(bytesNeeded);
-  t_zone *firstZone = getFirstZone(heap_type);
+  t_zone *firstZone = getHeapStart(heap_type);
   // if there is no first zone create a new zone and check it worked
   if (!firstZone) {
     if (!newZone(bytesNeeded))
       return debugError("Failed to create new zone\n"), NULL;
-    firstZone = getFirstZone(heap_type);
+    firstZone = getHeapStart(heap_type);
     printf("expecting some pointer value: %p\n", (void *)firstZone);
     if (!firstZone)
       return debugError("get first zone returned null when newZone succeeded"),

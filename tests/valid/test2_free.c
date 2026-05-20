@@ -33,6 +33,6 @@ int main() {
   void *v = ft_malloc(sizeof(t_test) + 300);
   free(nest);
   free(s2);
-  show_alloc_mem_ex();
+  show_alloc_mem();
   return 0;
 }

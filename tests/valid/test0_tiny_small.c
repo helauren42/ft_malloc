@@ -2,10 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
-// testing allocs of all sizes
-
 int main() {
-  char *str = ft_malloc(sizeof(char) * 20);
+  char *str = ft_malloc(sizeof(char) * 50);
   strcpy(str, "Hello World");
   printf("%s\n", str);
   printf("%p\n", str);
@@ -13,6 +11,6 @@ int main() {
   strcpy(s2, "s2 Hello World");
   printf("expecting %p\n", (void *)str - T_BLOCK_SIZE);
   printf("expecting %p\n", (void *)s2 - T_BLOCK_SIZE);
-  show_alloc_mem_ex();
+  show_alloc_mem();
   return 0;
 }

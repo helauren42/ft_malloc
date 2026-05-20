@@ -19,6 +19,7 @@
 // T_BLOCK_SIZE) ~ 32768 / (128 + 40) = 195
 #define SMALL_ZONE_SIZE (PAGE_SIZE * 64) // 64
 #define SMALL_MAX_PAYLOAD 1024
+#define GUARD_VAL 17496424073816618564
 
 #define SMALL_MIN_PAYLOAD TINY_MAX_PAYLOAD + 1
 #define LARGE_MIN_PAYLOAD SMALL_MAX_PAYLOAD + 1
@@ -79,17 +80,18 @@ typedef struct s_heaps {
   enum FUNCTION_CALLED function_called;
 } t_heaps;
 
-extern t_heaps g_heaps;
+extern t_heaps g_global;
 
 // MAIN
 void free(void *ptr);
 void *ft_malloc(size_t size);
 void *realloc(void *ptr, size_t size);
-void show_alloc_mem_ex();
+void show_alloc_mem();
 
 // ZONES
 t_zone *newZone(const size_t size);
-t_zone *getFirstZone(const enum HEAP_TYPE heap_type);
+t_zone **getFirstZone(const enum HEAP_TYPE heap_type);
+void removeZone(t_block *block, t_zone *zone);
 
 // BLOCKS
 t_block *allocBlock(const size_t bytesNeeded);

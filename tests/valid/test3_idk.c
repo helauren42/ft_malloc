@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 
-// testing allocs of all sizes
-
 typedef struct s_nest {
   void *anything_else;
   void *something_else;
@@ -29,7 +27,8 @@ int main() {
   printf("expecting %p\n", (void *)str - T_BLOCK_SIZE);
   printf("expecting %p\n", (void *)s2 - T_BLOCK_SIZE);
   t_nest *nest = ft_malloc(sizeof(t_nest));
-  t_test *test = ft_malloc(sizeof(t_test));
+  free(nest);
+  free(s2);
   show_alloc_mem();
   return 0;
 }

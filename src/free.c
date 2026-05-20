@@ -1,24 +1,32 @@
 #include "ft_malloc.h"
 #include <sys/mman.h>
 
-inline static void mergeBlocks(t_block *block, t_block *next) {
+inline static void mergeBlocks(t_block *block) {
+  t_block *next = block->next;
+  t_block *prev = block->prev;
   if (next && next->is_free) {
     block->payload_bytes += next->payload_bytes + T_BLOCK_SIZE;
+  }
+  if (prev && prev->is_free) {
+    block->payload_bytes += prev->payload_bytes + T_BLOCK_SIZE;
   }
 }
 
 void free(void *ptr) {
   if (!ptr)
     return;
-  g_heaps.function_called = FREE;
+  g_global.function_called = FREE;
   t_block *block = getHeaderAddr(ptr);
   printStr("Freeding this addr:");
   printAddr(block, true);
+  if (block->is_free) {
+    errorDoubleFree();
+    return;
+  }
   block->is_free = true;
-  t_block *next = block->next;
-  mergeBlocks(block, next);
+  mergeBlocks(block);
   t_zone *zone = block->zone;
   zone->active_block_count--;
   if (zone->active_block_count == 0)
-    munmap(zone, 1);
+    removeZone(block, zone);
 }

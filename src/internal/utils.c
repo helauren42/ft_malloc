@@ -12,11 +12,11 @@ inline enum HEAP_TYPE getHeapType(const size_t bytesNeeded) {
 inline t_zone *getHeapStart(const enum HEAP_TYPE heap_type) {
   switch (heap_type) {
   case TINY:
-    return g_heaps.tiny_first;
+    return g_global.tiny_first;
   case SMALL:
-    return g_heaps.small_first;
+    return g_global.small_first;
   case LARGE:
-    return g_heaps.large_first;
+    return g_global.large_first;
   }
   return NULL;
 }
