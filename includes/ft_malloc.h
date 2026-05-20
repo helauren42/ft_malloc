@@ -19,7 +19,7 @@
 // T_BLOCK_SIZE) ~ 32768 / (128 + 40) = 195
 #define SMALL_ZONE_SIZE (PAGE_SIZE * 64) // 64
 #define SMALL_MAX_PAYLOAD 1024
-#define GUARD_VAL 17496424073816618564
+#define GUARD_VAL 17496424073816618564 // TODO
 
 #define SMALL_MIN_PAYLOAD TINY_MAX_PAYLOAD + 1
 #define LARGE_MIN_PAYLOAD SMALL_MAX_PAYLOAD + 1
@@ -78,6 +78,7 @@ typedef struct s_heaps {
   t_zone *small_last;
   t_zone *large_last;
   enum FUNCTION_CALLED function_called;
+  int fd;
 } t_heaps;
 
 extern t_heaps g_global;
@@ -87,6 +88,9 @@ void free(void *ptr);
 void *ft_malloc(size_t size);
 void *realloc(void *ptr, size_t size);
 void show_alloc_mem();
+
+// HISTORY
+static void logFree(void *headerAddr);
 
 // ZONES
 t_zone *newZone(const size_t size);

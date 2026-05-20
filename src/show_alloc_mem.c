@@ -110,11 +110,6 @@ void show_alloc_mem() {
 
   printLine("------------ TINY HEAP ------------");
   toAdd = printZones(g_global.tiny_first, TINY);
-  // printStr("toadd\n");
-  // ft_putsize_t(toAdd.bytes_mapped, 1);
-  // printStr("\n");
-  // ft_putsize_t(toAdd.bytes_used, 1);
-  // printStr("\n");
   totalMem = addMem(totalMem, toAdd);
   printLine("------------ SMALL HEAP ------------");
   toAdd = printZones(g_global.small_first, SMALL);
