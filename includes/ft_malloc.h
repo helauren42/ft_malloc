@@ -3,10 +3,11 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
-#define DEV 1
+#define DEV 0
 #define SECURE 0 // 0-1 if 1 then on free data will be zeroed
 
 #define PAGE_SIZE getpagesize()
@@ -80,6 +81,13 @@ typedef struct s_heaps {
   enum FUNCTION_CALLED function_called;
 } t_heaps;
 
+typedef struct s_mem_usage t_mem_usage;
+
+typedef struct s_mem_usage {
+  size_t bytes_mapped;
+  size_t bytes_used;
+} t_mem_usage;
+
 extern t_heaps g_global;
 
 // MAIN
@@ -87,6 +95,15 @@ void free(void *ptr);
 void *ft_malloc(size_t size);
 void *realloc(void *ptr, size_t size);
 void show_alloc_mem();
+void show_alloc_mem_ex();
+
+// SHOW ALLOC
+void printZoneTitle(const unsigned int count);
+size_t getLargeZoneSize(t_zone *zone);
+size_t getZoneSize(t_zone *zone, const enum HEAP_TYPE heap_type);
+t_mem_usage printZones(t_zone *zone, const enum HEAP_TYPE heap_type,
+                       const bool hex);
+t_mem_usage addMem(const t_mem_usage a, const t_mem_usage b);
 
 // ZONES
 t_zone *newZone(const size_t size);
@@ -112,6 +129,7 @@ void debugInfo(char *str);
 
 // LIBFT
 int ft_strlen(const char *str);
+char *ft_strcpy(char *dest, char *src);
 void ft_bzero(void *dst, const size_t n);
 void ft_putnbr_fd(long n, int fd);
 void ft_putsize_t(size_t n, int fd);

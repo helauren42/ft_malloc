@@ -1,0 +1,6 @@
+- implement realloc
+- implement large allocation
+
+- add guard
+- add history log in file if env set || print in hexadecimal
+- isolate internal functions inside another header file

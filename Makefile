@@ -1,6 +1,6 @@
 NAME = libft_malloc.so
 
-SRCS := src/free.c src/internal/blocks.c src/internal/debug.c src/internal/errors.c src/internal/libft.c src/internal/print.c src/internal/utils.c src/internal/zones.c src/malloc.c src/show_alloc_mem.c
+SRCS := src/free.c src/internal/blocks.c src/internal/debug.c src/internal/errors.c src/internal/libft.c src/internal/print.c src/internal/show_alloc.c src/internal/utils.c src/internal/zones.c src/malloc.c src/show_alloc_mem.c src/show_alloc_mem_ex.c
 SRC_DIR=src/
 OBJS = $(SRCS:.c=.o)
 

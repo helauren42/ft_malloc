@@ -17,8 +17,8 @@ void free(void *ptr) {
     return;
   g_global.function_called = FREE;
   t_block *block = getHeaderAddr(ptr);
-  printStr("Freeding this addr:");
-  printAddr(block, true);
+  // printStr("Freeding this addr:"); // TODO logs?
+  // printAddr(block, true);
   if (block->is_free) {
     errorDoubleFree();
     return;

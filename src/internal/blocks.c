@@ -60,12 +60,11 @@ static t_block *unfreeBlock(const size_t bytesNeeded, t_free_block *curr_block,
     if (!curr_block->prev)
       setFirstBlock(g_global, (t_block *)curr_block);
   }
-  printStr("UNFREED: ");
-  printAddr(curr_block, true);
+  // printStr("UNFREED: "); // TODO logs?
+  // printAddr(curr_block, true);
   return (t_block *)curr_block;
 }
 
-// TODO incr zone block count on successfull call
 t_block *allocBlock(const size_t bytesNeeded) {
   const enum HEAP_TYPE heap_type = getHeapType(bytesNeeded);
   t_zone *firstZone = getHeapStart(heap_type);
@@ -74,7 +73,6 @@ t_block *allocBlock(const size_t bytesNeeded) {
     if (!newZone(bytesNeeded))
       return debugError("Failed to create new zone\n"), NULL;
     firstZone = getHeapStart(heap_type);
-    printf("expecting some pointer value: %p\n", (void *)firstZone);
     if (!firstZone)
       return debugError("get first zone returned null when newZone succeeded"),
              NULL;

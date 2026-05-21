@@ -21,18 +21,17 @@ def matchBlocksSize(blocksSizes: list[int], expected: list[int]):
     blocksSizes.sort()
     expected.sort()
     if blocksSizes != expected:
-        print(f"{RED}\n-------- Error in blocks")
+        print(f"{RED}\nError in blocks")
         it = difflib.ndiff([str(x) for x in expected], [str(x) for x in blocksSizes])
         print("\n".join(it))
         print("- EXPECTED:", expected)
-        print("- RECEIVED:", blocksSizes)
+        print("- RECEIVED:", blocksSizes, f"{RESET}")
     else:
         print(f"{GREEN}success: {blocksSizes}{RESET}")
 
 def processBlocks(out: str, expectedBlocks: tuple[list[int], list[int], list[int]]):
     lines = out.splitlines(keepends=True)
     i = 0
-    print("!!",lines)
     while lines[i] != "------------ TINY HEAP ------------\n":
         i += 1
     tiny_heap_start = i+1
@@ -42,7 +41,7 @@ def processBlocks(out: str, expectedBlocks: tuple[list[int], list[int], list[int
     while lines[i] != "------------ LARGE HEAP ------------\n":
         i += 1
     large_heap_start = i+1
-    while lines[i] != "------------ HEAP END ------------\n":
+    while lines[i] != "------------ HEAP END --------------\n":
         i += 1
     heap_end = i
     print("--- Expected blocks: ", expectedBlocks)
