@@ -4,11 +4,11 @@ If you want the lsp to function properly update the `directory` parameter inside
 
 # Description
 
-**Zones (t_zone)**: Manages large memory regions via mmap. Includes logic to munmap entire zones when they become empty.
+**Heaps (t_heap)**: Manages large memory regions via mmap. Includes logic to munmap entire heap when they become unused.
 
-**Blocks (t_block)**: Inline headers that track allocation size and state.
+**Chunks (t_chunk)**: Inline headers that track allocation size and state.
 
-**Intrusive Free List**: When a block is freed, the empty payload area is used to store navigation pointers without increasing metadata overhead.
+**Intrusive Free List**: When a chunk is freed, the empty payload area is used to store navigation pointers without increasing metadata overhead.
 
 # Errors
 
@@ -20,7 +20,7 @@ If the system call function mmap fails, which usually happens when there is no p
 
 #### heap metadata corruption
 
-Heap metadata is the "header" information stored just before an allocated memory block that allows malloc and free to function correctly. When this metadata becomes inconsistent, it is typically because the user wrote data past the end of an allocated buffer, accidentally overwriting the management data of the next block.
+Heap metadata is the "header" information stored just before an allocated memory chunk that allows malloc and free to function correctly. When this metadata becomes inconsistent, it is typically because the user wrote data past the end of an allocated buffer, accidentally overwriting the management data of the next chunk.
 If this heap metadata corruption error occurs a SIGABRT signal is sent which will return the exit code 134.
 The function called's name (malloc, realloc, free) followed by this message will be output to stderr:
 `heap metadata corrupted`

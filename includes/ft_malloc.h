@@ -11,14 +11,14 @@
 #define SECURE 0 // 0-1 if 1 then on free data will be zeroed
 
 #define PAGE_SIZE getpagesize()
-#define T_BLOCK_SIZE sizeof(t_block) // 40 bytes
-#define T_FREE_BLOCK_SIZE sizeof(t_free_block)
-#define T_ZONE_SIZE sizeof(t_zone)
-#define TINY_ZONE_SIZE (PAGE_SIZE * 8)
+#define T_CHUNK_SIZE sizeof(t_chunk) // 40 bytes
+#define T_FREE_CHUNK_SIZE sizeof(t_free_chunk)
+#define T_HEAP_SIZE sizeof(t_heap)
+#define TINY_HEAP_SIZE (PAGE_SIZE * 8)
 #define TINY_MAX_PAYLOAD 128
-// max number of blocks is TINY_ZONE_SIZE / (TINY_MAX_PAYLOAD +
-// T_BLOCK_SIZE) ~ 32768 / (128 + 40) = 195
-#define SMALL_ZONE_SIZE (PAGE_SIZE * 64) // 64
+// max number of chunks is TINY_HEAP_SIZE / (TINY_MAX_PAYLOAD +
+// T_CHUNK_SIZE) ~ 32768 / (128 + 40) = 195
+#define SMALL_HEAP_SIZE (PAGE_SIZE * 64) // 64
 #define SMALL_MAX_PAYLOAD 1024
 #define GUARD_VAL 17496424073816618564
 
@@ -28,58 +28,58 @@
 #define MMAP_FLAGS (MAP_PRIVATE | MAP_ANONYMOUS | MAP_POPULATE)
 #define MMAP_PROT (PROT_READ | PROT_WRITE)
 
-#define PAYLOAD_SIZE(block_bytes) block_bytes - T_BLOCK_SIZE
+#define PAYLOAD_SIZE(chunk_bytes) chunk_bytes - T_CHUNK_SIZE
 
 enum HEAP_TYPE { TINY, SMALL, LARGE };
 
 enum FUNCTION_CALLED { MALLOC, REALLOC, FREE };
 
-typedef struct s_heaps t_heaps;
-typedef struct s_block t_block;
-typedef struct s_free_block t_free_block;
-typedef struct s_zone t_zone;
+typedef struct s_chunk t_chunk;
+typedef struct s_free_chunk t_free_chunk;
+typedef struct s_heap t_heap;
+typedef struct s_arenas t_arenas;
 
-typedef struct s_block {
-  t_block *next;
-  t_block *prev;
-  t_zone *zone;
+typedef struct s_chunk {
+  t_chunk *next;
+  t_chunk *prev;
+  t_heap *heap;
   size_t payload_bytes;
   bool is_free;
-} t_block;
+} t_chunk;
 
-typedef struct s_free_block {
-  t_block *next;
-  t_block *prev;
-  void *zone;
+typedef struct s_free_chunk {
+  t_chunk *next;
+  t_chunk *prev;
+  void *heap;
   size_t payload_bytes;
   bool is_free;
-  t_free_block *next_free;
-  t_free_block *prev_free;
-} t_free_block;
+  t_free_chunk *next_free;
+  t_free_chunk *prev_free;
+} t_free_chunk;
 
-typedef struct s_zone {
+typedef struct s_heap {
   enum HEAP_TYPE heap_type;
-  t_zone *prev;
-  t_zone *next;
-  t_block *first_block;
-  t_free_block *first_free_block;
-  unsigned int active_block_count; // checked on freeing to know if zone should
+  t_heap *prev;
+  t_heap *next;
+  t_chunk *first_chunk;
+  t_free_chunk *first_free_chunk;
+  unsigned int active_chunk_count; // checked on freeing to know if heap should
                                    // be unmapped
   size_t size;
-  size_t free_bytes; // check on allocation to know if the zone potentially
-                     // has a big enough block left or not but actually
-                     // first_free_block might be enough for this
-} t_zone;
+  size_t free_bytes; // check on allocation to know if the heap potentially
+                     // has a big enough chunk left or not but actually
+                     // first_free_chunk might be enough for this
+} t_heap;
 
-typedef struct s_heaps {
-  t_zone *tiny_first;
-  t_zone *small_first;
-  t_zone *large_first;
-  t_zone *tiny_last;
-  t_zone *small_last;
-  t_zone *large_last;
+typedef struct s_arenas {
+  t_heap *tiny_first;
+  t_heap *small_first;
+  t_heap *large_first;
+  t_heap *tiny_last;
+  t_heap *small_last;
+  t_heap *large_last;
   enum FUNCTION_CALLED function_called;
-} t_heaps;
+} t_arenas;
 
 typedef struct s_mem_usage t_mem_usage;
 
@@ -88,7 +88,7 @@ typedef struct s_mem_usage {
   size_t bytes_used;
 } t_mem_usage;
 
-extern t_heaps g_global;
+extern t_arenas g_global;
 
 // MAIN
 void free(void *ptr);
@@ -99,25 +99,25 @@ void show_alloc_mem_ex();
 
 // SHOW ALLOC
 void printZoneTitle(const unsigned int count);
-size_t getLargeZoneSize(t_zone *zone);
-size_t getZoneSize(t_zone *zone, const enum HEAP_TYPE heap_type);
-t_mem_usage printZones(t_zone *zone, const enum HEAP_TYPE heap_type,
+size_t getLargeZoneSize(t_heap *heap);
+size_t getZoneSize(t_heap *heap, const enum HEAP_TYPE heap_type);
+t_mem_usage printZones(t_heap *heap, const enum HEAP_TYPE heap_type,
                        const bool hex);
 t_mem_usage addMem(const t_mem_usage a, const t_mem_usage b);
 
-// ZONES
-t_zone *newZone(const size_t size);
-t_zone **getFirstZone(const enum HEAP_TYPE heap_type);
-void removeZone(t_block *block, t_zone *zone);
+// HEAPS
+t_heap *newZone(const size_t size);
+t_heap **getFirstZone(const enum HEAP_TYPE heap_type);
+void removeZone(t_chunk *chunk, t_heap *heap);
 
-// BLOCKS
-t_block *allocBlock(const size_t bytesNeeded);
+// CHUNKS
+t_chunk *allocBlock(const size_t bytesNeeded);
 
 // UTILS
 enum HEAP_TYPE getHeapType(const size_t bytesNeeded);
-t_zone *getHeapStart(const enum HEAP_TYPE heap_type);
-void *getPayloadAddr(t_block *block);
-t_block *getHeaderAddr(void *payload);
+t_heap *getHeapStart(const enum HEAP_TYPE heap_type);
+void *getPayloadAddr(t_chunk *chunk);
+t_chunk *getHeaderAddr(void *payload);
 
 // ERRORS
 void errorHeapMetadataCorruption();

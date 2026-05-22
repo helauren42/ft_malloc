@@ -9,7 +9,7 @@ inline enum HEAP_TYPE getHeapType(const size_t bytesNeeded) {
   return LARGE;
 }
 
-inline t_zone *getHeapStart(const enum HEAP_TYPE heap_type) {
+inline t_heap *getHeapStart(const enum HEAP_TYPE heap_type) {
   switch (heap_type) {
   case TINY:
     return g_global.tiny_first;
@@ -21,11 +21,11 @@ inline t_zone *getHeapStart(const enum HEAP_TYPE heap_type) {
   return NULL;
 }
 
-inline void *getPayloadAddr(t_block *block) {
-  return (void *)block + T_BLOCK_SIZE;
+inline void *getPayloadAddr(t_chunk *chunk) {
+  return (void *)chunk + T_CHUNK_SIZE;
 }
 
-inline t_block *getHeaderAddr(void *payload) {
+inline t_chunk *getHeaderAddr(void *payload) {
   // TODO check metadata
-  return (void *)payload - T_BLOCK_SIZE;
+  return (void *)payload - T_CHUNK_SIZE;
 }

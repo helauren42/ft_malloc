@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <sys/mman.h>
 
-t_heaps g_global = {NULL, NULL, NULL, NULL, NULL, NULL, 0};
+t_arenas g_global = {NULL, NULL, NULL, NULL, NULL, NULL, 0};
 
-inline static t_zone **getLastZone(const enum HEAP_TYPE heap_type) {
+inline static t_heap **getLastZone(const enum HEAP_TYPE heap_type) {
   switch (heap_type) {
   case TINY:
     return &g_global.tiny_last;
@@ -19,7 +19,7 @@ inline static t_zone **getLastZone(const enum HEAP_TYPE heap_type) {
   }
 }
 
-inline t_zone **getFirstZone(const enum HEAP_TYPE heap_type) {
+inline t_heap **getFirstZone(const enum HEAP_TYPE heap_type) {
   switch (heap_type) {
   case TINY:
     return &g_global.tiny_first;
@@ -33,101 +33,101 @@ inline t_zone **getFirstZone(const enum HEAP_TYPE heap_type) {
   }
 }
 
-inline static t_zone *newLimitedZone(const enum HEAP_TYPE heap_type) {
-  size_t zone_size = heap_type == TINY ? TINY_ZONE_SIZE : SMALL_ZONE_SIZE;
-  t_zone *new_zone = NULL;
-  new_zone = mmap(NULL, zone_size, MMAP_PROT, MMAP_FLAGS, -1, 0);
-  if (new_zone == MAP_FAILED)
+inline static t_heap *newLimitedZone(const enum HEAP_TYPE heap_type) {
+  size_t heap_size = heap_type == TINY ? TINY_HEAP_SIZE : SMALL_HEAP_SIZE;
+  t_heap *new_heap = NULL;
+  new_heap = mmap(NULL, heap_size, MMAP_PROT, MMAP_FLAGS, -1, 0);
+  if (new_heap == MAP_FAILED)
     return MAP_FAILED;
-  return new_zone;
+  return new_heap;
 }
 
-inline static void initNewZone(t_zone *new_zone,
+inline static void initNewZone(t_heap *new_heap,
                                const enum HEAP_TYPE heap_type) {
-  // new zone
-  new_zone->heap_type = heap_type;
-  new_zone->next = NULL;
-  new_zone->prev = NULL; // prev is set inside appendNewZone
-  new_zone->active_block_count = 0;
-  new_zone->first_free_block = (void *)(new_zone + 1);
-  // first_free_block
-  t_free_block *first_free_block = new_zone->first_free_block;
-  first_free_block->prev = NULL;
-  first_free_block->next = NULL;
+  // new heap
+  new_heap->heap_type = heap_type;
+  new_heap->next = NULL;
+  new_heap->prev = NULL; // prev is set inside appendNewZone
+  new_heap->active_chunk_count = 0;
+  new_heap->first_free_chunk = (void *)(new_heap + 1);
+  // first_free_chunk
+  t_free_chunk *first_free_chunk = new_heap->first_free_chunk;
+  first_free_chunk->prev = NULL;
+  first_free_chunk->next = NULL;
   // both
   switch (heap_type) {
   case TINY:
-    new_zone->free_bytes = TINY_ZONE_SIZE - T_ZONE_SIZE - T_BLOCK_SIZE;
-    first_free_block->payload_bytes = TINY_ZONE_SIZE - T_BLOCK_SIZE;
+    new_heap->free_bytes = TINY_HEAP_SIZE - T_HEAP_SIZE - T_CHUNK_SIZE;
+    first_free_chunk->payload_bytes = TINY_HEAP_SIZE - T_CHUNK_SIZE;
     break;
   case SMALL:
-    new_zone->free_bytes = SMALL_ZONE_SIZE - T_ZONE_SIZE - T_BLOCK_SIZE;
-    first_free_block->payload_bytes = SMALL_ZONE_SIZE - T_BLOCK_SIZE;
+    new_heap->free_bytes = SMALL_HEAP_SIZE - T_HEAP_SIZE - T_CHUNK_SIZE;
+    first_free_chunk->payload_bytes = SMALL_HEAP_SIZE - T_CHUNK_SIZE;
     break;
   case LARGE:
-    new_zone->free_bytes = 0;            // TODO
-    first_free_block->payload_bytes = 0; // TODO
+    new_heap->free_bytes = 0;            // TODO
+    first_free_chunk->payload_bytes = 0; // TODO
     break;
   default:
     debugError("errorHeapMetadataCorruption default case");
   }
 }
 
-inline static void appendNewZone(t_zone *new_zone,
+inline static void appendNewZone(t_heap *new_heap,
                                  const enum HEAP_TYPE heap_type) {
-  t_zone **last_zone;
-  t_zone **first_zone;
+  t_heap **last_heap;
+  t_heap **first_heap;
   switch (heap_type) {
   case TINY:
-    last_zone = &g_global.tiny_last;
-    first_zone = &g_global.tiny_first;
+    last_heap = &g_global.tiny_last;
+    first_heap = &g_global.tiny_first;
     break;
   case SMALL:
-    last_zone = &g_global.small_last;
-    first_zone = &g_global.small_first;
+    last_heap = &g_global.small_last;
+    first_heap = &g_global.small_first;
     break;
   case LARGE:
-    last_zone = &g_global.large_last;
-    first_zone = &g_global.large_first;
+    last_heap = &g_global.large_last;
+    first_heap = &g_global.large_first;
     break;
   }
-  if (*last_zone) {
-    (*last_zone)->next = new_zone;
-    new_zone->prev = *last_zone;
+  if (*last_heap) {
+    (*last_heap)->next = new_heap;
+    new_heap->prev = *last_heap;
   } else {
-    *first_zone = new_zone;
+    *first_heap = new_heap;
   }
-  *last_zone = new_zone;
+  *last_heap = new_heap;
 }
 
-inline t_zone *newZone(const size_t size) {
+inline t_heap *newZone(const size_t size) {
   const enum HEAP_TYPE heap_type = getHeapType(size);
-  // creating new zone
-  t_zone *new_zone;
+  // creating new heap
+  t_heap *new_heap;
   if (heap_type == LARGE) {
-    new_zone = mmap(NULL, size, MMAP_PROT, MMAP_FLAGS, -1, 0);
+    new_heap = mmap(NULL, size, MMAP_PROT, MMAP_FLAGS, -1, 0);
   } else {
-    new_zone = newLimitedZone(heap_type);
+    new_heap = newLimitedZone(heap_type);
   }
-  if (new_zone == MAP_FAILED)
+  if (new_heap == MAP_FAILED)
     return debugError("map failed bruhh"), NULL;
-  // appending new zone to list of zones
-  initNewZone(new_zone, heap_type);
-  appendNewZone(new_zone, heap_type);
-  return new_zone;
+  // appending new heap to list of heaps
+  initNewZone(new_heap, heap_type);
+  appendNewZone(new_heap, heap_type);
+  return new_heap;
 }
 
-inline void removeZone(t_block *block, t_zone *zone) {
-  t_zone *prev = zone->prev;
-  t_zone *next = zone->next;
+inline void removeZone(t_chunk *chunk, t_heap *heap) {
+  t_heap *prev = heap->prev;
+  t_heap *next = heap->next;
   if (prev) {
     prev->next = next;
   } else {
-    t_zone **zone = getFirstZone(getHeapType(block->payload_bytes));
+    t_heap **heap = getFirstZone(getHeapType(chunk->payload_bytes));
     if (next)
-      (*zone) = next;
+      (*heap) = next;
     else
-      (*zone) = NULL;
+      (*heap) = NULL;
   }
-  munmap(zone, T_ZONE_SIZE);
+  munmap(heap, T_HEAP_SIZE);
 }

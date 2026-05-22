@@ -44,15 +44,15 @@ inline static void dumpPayload(const uint8_t *ptr, size_t len) {
 
 inline static void dumpHeader(const uint8_t *ptr) {
   printStr("\n    Header: ");
-  for (size_t i = 0; i < T_BLOCK_SIZE; i++)
+  for (size_t i = 0; i < T_CHUNK_SIZE; i++)
     printHex(*(ptr + i));
   printStr("\n");
 }
 
-inline static void hexDump(const t_block *block) {
-  uint8_t *uint_ptr = (uint8_t *)block;
+inline static void hexDump(const t_chunk *chunk) {
+  uint8_t *uint_ptr = (uint8_t *)chunk;
   dumpHeader(uint_ptr);
-  dumpPayload(uint_ptr + T_BLOCK_SIZE, block->payload_bytes);
+  dumpPayload(uint_ptr + T_CHUNK_SIZE, chunk->payload_bytes);
 }
 
 inline static void printBlockTitle(const unsigned int count) {
@@ -61,34 +61,34 @@ inline static void printBlockTitle(const unsigned int count) {
   write(1, "=> ", 3);
 }
 
-inline static void printBlock(const unsigned int count, const t_block *block,
+inline static void printBlock(const unsigned int count, const t_chunk *chunk,
                               const bool hex) {
   printBlockTitle(count);
-  printAddr(block, false);
+  printAddr(chunk, false);
   printStr(" - ");
   const void *lastByteAddr =
-      (void *)block + T_BLOCK_SIZE + block->payload_bytes;
+      (void *)chunk + T_CHUNK_SIZE + chunk->payload_bytes;
   printAddr(lastByteAddr, false);
   printStr(" : ");
-  hex ? hexDump(block) : ft_putsize_t(block->payload_bytes, 1);
+  hex ? hexDump(chunk) : ft_putsize_t(chunk->payload_bytes, 1);
   printLine("");
 }
 
-inline static size_t printBlocks(t_block *block, const bool hex) {
+inline static size_t printBlocks(t_chunk *chunk, const bool hex) {
   unsigned int i = 0;
   size_t bytes_used = 0;
-  if (!block)
+  if (!chunk)
     debugInfo("Block is null");
   else
     debugInfo("Block is not null");
-  while (block) {
-    // printAddr(block, true);
-    if (!block->is_free) {
-      bytes_used += block->payload_bytes;
-      printBlock(i, block, hex);
+  while (chunk) {
+    // printAddr(chunk, true);
+    if (!chunk->is_free) {
+      bytes_used += chunk->payload_bytes;
+      printBlock(i, chunk, hex);
       i++;
     }
-    block = block->next;
+    chunk = chunk->next;
   }
   return bytes_used;
 }
@@ -99,42 +99,42 @@ inline void printZoneTitle(const unsigned int count) {
   write(1, "=> ", 3);
 }
 
-inline size_t getLargeZoneSize(t_zone *zone) {
+inline size_t getLargeZoneSize(t_heap *heap) {
   size_t usedSize = 0;
-  t_block *block = zone->first_block;
-  while (block) {
-    usedSize += T_BLOCK_SIZE + block->payload_bytes;
+  t_chunk *chunk = heap->first_chunk;
+  while (chunk) {
+    usedSize += T_CHUNK_SIZE + chunk->payload_bytes;
   }
-  size_t zoneSize = PAGE_SIZE;
-  while (zoneSize < usedSize)
-    zoneSize += PAGE_SIZE;
-  return zoneSize;
+  size_t heapSize = PAGE_SIZE;
+  while (heapSize < usedSize)
+    heapSize += PAGE_SIZE;
+  return heapSize;
 }
 
-inline size_t getZoneSize(t_zone *zone, const enum HEAP_TYPE heap_type) {
+inline size_t getZoneSize(t_heap *heap, const enum HEAP_TYPE heap_type) {
   switch (heap_type) {
   case TINY:
-    return TINY_ZONE_SIZE;
+    return TINY_HEAP_SIZE;
   case SMALL:
-    return SMALL_ZONE_SIZE;
+    return SMALL_HEAP_SIZE;
   case LARGE:
-    return getLargeZoneSize(zone);
+    return getLargeZoneSize(heap);
   }
   return 0;
 }
 
-inline t_mem_usage printZones(t_zone *zone, const enum HEAP_TYPE heap_type,
+inline t_mem_usage printZones(t_heap *heap, const enum HEAP_TYPE heap_type,
                               const bool hex) {
   // TODO
   unsigned int i = 0;
   size_t bytes_used = 0;
   size_t bytes_mapped = 0;
-  while (zone) {
+  while (heap) {
     printZoneTitle(i);
-    printAddr(zone, true);
-    bytes_used += printBlocks(zone->first_block, hex);
-    bytes_mapped += getZoneSize(zone, heap_type);
-    zone = zone->next;
+    printAddr(heap, true);
+    bytes_used += printBlocks(heap->first_chunk, hex);
+    bytes_mapped += getZoneSize(heap, heap_type);
+    heap = heap->next;
     i++;
   }
   t_mem_usage mem = {bytes_mapped, bytes_used};

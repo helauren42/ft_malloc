@@ -1,14 +1,14 @@
 #include "ft_malloc.h"
 #include <sys/mman.h>
 
-inline static void mergeBlocks(t_block *block) {
-  t_block *next = block->next;
-  t_block *prev = block->prev;
+inline static void mergeBlocks(t_chunk *chunk) {
+  t_chunk *next = chunk->next;
+  t_chunk *prev = chunk->prev;
   if (next && next->is_free) {
-    block->payload_bytes += next->payload_bytes + T_BLOCK_SIZE;
+    chunk->payload_bytes += next->payload_bytes + T_CHUNK_SIZE;
   }
   if (prev && prev->is_free) {
-    block->payload_bytes += prev->payload_bytes + T_BLOCK_SIZE;
+    chunk->payload_bytes += prev->payload_bytes + T_CHUNK_SIZE;
   }
 }
 
@@ -16,17 +16,17 @@ void free(void *ptr) {
   if (!ptr)
     return;
   g_global.function_called = FREE;
-  t_block *block = getHeaderAddr(ptr);
+  t_chunk *chunk = getHeaderAddr(ptr);
   // printStr("Freeding this addr:"); // TODO logs?
-  // printAddr(block, true);
-  if (block->is_free) {
+  // printAddr(chunk, true);
+  if (chunk->is_free) {
     errorDoubleFree();
     return;
   }
-  block->is_free = true;
-  mergeBlocks(block);
-  t_zone *zone = block->zone;
-  zone->active_block_count--;
-  if (zone->active_block_count == 0)
-    removeZone(block, zone);
+  chunk->is_free = true;
+  mergeBlocks(chunk);
+  t_heap *heap = chunk->heap;
+  heap->active_chunk_count--;
+  if (heap->active_chunk_count == 0)
+    removeZone(chunk, heap);
 }

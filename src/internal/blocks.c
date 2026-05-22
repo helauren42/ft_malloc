@@ -4,94 +4,94 @@
 #include <unistd.h>
 
 inline static size_t NewFreeBlockMinSize(const enum HEAP_TYPE heap_type) {
-  static const size_t sizes[LARGE + 1] = {[TINY] = T_FREE_BLOCK_SIZE,
+  static const size_t sizes[LARGE + 1] = {[TINY] = T_FREE_CHUNK_SIZE,
                                           [SMALL] = SMALL_MIN_PAYLOAD,
                                           [LARGE] = LARGE_MIN_PAYLOAD};
   return sizes[heap_type];
 }
 
-static inline void setFirstFreeBlock(t_zone *g_global, t_zone *zone,
-                                     t_free_block *new_free_block) {
-  zone->first_free_block = new_free_block;
-  g_global->first_free_block = new_free_block;
+static inline void setFirstFreeBlock(t_heap *g_global, t_heap *heap,
+                                     t_free_chunk *new_free_chunk) {
+  heap->first_free_chunk = new_free_chunk;
+  g_global->first_free_chunk = new_free_chunk;
 }
 
-static inline void setFirstBlock(t_zone *g_global, t_block *curr_block) {
-  g_global->first_block = (t_block *)curr_block;
+static inline void setFirstBlock(t_heap *g_global, t_chunk *curr_chunk) {
+  g_global->first_chunk = (t_chunk *)curr_chunk;
 }
 
 // TODO check for heap metadata corruption
-static t_block *unfreeBlock(const size_t bytesNeeded, t_free_block *curr_block,
-                            t_zone *zone, const enum HEAP_TYPE heap_type) {
-  const size_t extra_bytes = curr_block->payload_bytes - bytesNeeded;
-  const bool split_block = extra_bytes >= NewFreeBlockMinSize(heap_type);
-  t_zone *g_global = getHeapStart(heap_type);
-  // if true we need to create new free block from the memory space that is left
-  // otherwise the block will be bigger than what has been requested
-  curr_block->is_free = false;
-  curr_block->zone = zone;
-  t_free_block *prev_free = curr_block->prev_free;
-  t_free_block *next_free = curr_block->next_free;
-  if (split_block) {
-    // new free block
-    t_free_block *new_free_block =
-        (void *)(curr_block) + T_BLOCK_SIZE + bytesNeeded;
-    new_free_block->next = curr_block->next;
-    new_free_block->prev = (void *)curr_block;
-    new_free_block->payload_bytes = extra_bytes - T_BLOCK_SIZE;
-    new_free_block->is_free = true, new_free_block->next_free = next_free;
-    new_free_block->prev_free = prev_free;
-    new_free_block->next_free = next_free;
+static t_chunk *unfreeBlock(const size_t bytesNeeded, t_free_chunk *curr_chunk,
+                            t_heap *heap, const enum HEAP_TYPE heap_type) {
+  const size_t extra_bytes = curr_chunk->payload_bytes - bytesNeeded;
+  const bool split_chunk = extra_bytes >= NewFreeBlockMinSize(heap_type);
+  t_heap *g_global = getHeapStart(heap_type);
+  // if true we need to create new free chunk from the memory space that is left
+  // otherwise the chunk will be bigger than what has been requested
+  curr_chunk->is_free = false;
+  curr_chunk->heap = heap;
+  t_free_chunk *prev_free = curr_chunk->prev_free;
+  t_free_chunk *next_free = curr_chunk->next_free;
+  if (split_chunk) {
+    // new free chunk
+    t_free_chunk *new_free_chunk =
+        (void *)(curr_chunk) + T_CHUNK_SIZE + bytesNeeded;
+    new_free_chunk->next = curr_chunk->next;
+    new_free_chunk->prev = (void *)curr_chunk;
+    new_free_chunk->payload_bytes = extra_bytes - T_CHUNK_SIZE;
+    new_free_chunk->is_free = true, new_free_chunk->next_free = next_free;
+    new_free_chunk->prev_free = prev_free;
+    new_free_chunk->next_free = next_free;
 
     if (!prev_free) {
-      setFirstFreeBlock(g_global, zone, new_free_block);
+      setFirstFreeBlock(g_global, heap, new_free_chunk);
     } else
-      prev_free->next_free = new_free_block;
-    if (!curr_block->prev)
-      setFirstBlock(g_global, (t_block *)curr_block);
-    // curr block
-    curr_block->payload_bytes -= extra_bytes;
-    curr_block->next = (void *)new_free_block;
+      prev_free->next_free = new_free_chunk;
+    if (!curr_chunk->prev)
+      setFirstBlock(g_global, (t_chunk *)curr_chunk);
+    // curr chunk
+    curr_chunk->payload_bytes -= extra_bytes;
+    curr_chunk->next = (void *)new_free_chunk;
   } else {
     if (!prev_free) {
-      setFirstFreeBlock(g_global, zone, next_free);
+      setFirstFreeBlock(g_global, heap, next_free);
     } else
       prev_free->next_free = next_free;
-    if (!curr_block->prev)
-      setFirstBlock(g_global, (t_block *)curr_block);
+    if (!curr_chunk->prev)
+      setFirstBlock(g_global, (t_chunk *)curr_chunk);
   }
   // printStr("UNFREED: "); // TODO logs?
-  // printAddr(curr_block, true);
-  return (t_block *)curr_block;
+  // printAddr(curr_chunk, true);
+  return (t_chunk *)curr_chunk;
 }
 
-t_block *allocBlock(const size_t bytesNeeded) {
+t_chunk *allocBlock(const size_t bytesNeeded) {
   const enum HEAP_TYPE heap_type = getHeapType(bytesNeeded);
-  t_zone *firstZone = getHeapStart(heap_type);
-  // if there is no first zone create a new zone and check it worked
+  t_heap *firstZone = getHeapStart(heap_type);
+  // if there is no first heap create a new heap and check it worked
   if (!firstZone) {
     if (!newZone(bytesNeeded))
-      return debugError("Failed to create new zone\n"), NULL;
+      return debugError("Failed to create new heap\n"), NULL;
     firstZone = getHeapStart(heap_type);
     if (!firstZone)
-      return debugError("get first zone returned null when newZone succeeded"),
+      return debugError("get first heap returned null when newZone succeeded"),
              NULL;
   }
-  // iterate through zones
-  t_zone *zone = firstZone;
-  while (zone) {
-    // iterate through blocks
-    t_free_block *free_block = zone->first_free_block;
-    while (free_block) {
-      if (free_block->payload_bytes >= bytesNeeded) {
-        t_block *block = unfreeBlock(bytesNeeded, free_block, zone, heap_type);
-        if (block)
-          zone->active_block_count++;
-        return block;
+  // iterate through heaps
+  t_heap *heap = firstZone;
+  while (heap) {
+    // iterate through chunks
+    t_free_chunk *free_chunk = heap->first_free_chunk;
+    while (free_chunk) {
+      if (free_chunk->payload_bytes >= bytesNeeded) {
+        t_chunk *chunk = unfreeBlock(bytesNeeded, free_chunk, heap, heap_type);
+        if (chunk)
+          heap->active_chunk_count++;
+        return chunk;
       }
-      free_block = free_block->next_free;
+      free_chunk = free_chunk->next_free;
     }
-    zone = zone->next;
+    heap = heap->next;
   }
   return NULL;
 }

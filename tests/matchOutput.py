@@ -17,17 +17,17 @@ def exctractBlocksSize(lines: list[str])-> list[int]:
         found.append(num)
     return found
 
-def matchBlocksSize(blocksSizes: list[int], expected: list[int]):
-    blocksSizes.sort()
+def matchBlocksSize(chunksSizes: list[int], expected: list[int]):
+    chunksSizes.sort()
     expected.sort()
-    if blocksSizes != expected:
-        print(f"{RED}\nError in blocks")
-        it = difflib.ndiff([str(x) for x in expected], [str(x) for x in blocksSizes])
+    if chunksSizes != expected:
+        print(f"{RED}\nError in chunks")
+        it = difflib.ndiff([str(x) for x in expected], [str(x) for x in chunksSizes])
         print("\n".join(it))
         print("- EXPECTED:", expected)
-        print("- RECEIVED:", blocksSizes, f"{RESET}")
+        print("- RECEIVED:", chunksSizes, f"{RESET}")
     else:
-        print(f"{GREEN}success: {blocksSizes}{RESET}")
+        print(f"{GREEN}success: {chunksSizes}{RESET}")
 
 def processBlocks(out: str, expectedBlocks: tuple[list[int], list[int], list[int]]):
     lines = out.splitlines(keepends=True)
@@ -44,7 +44,7 @@ def processBlocks(out: str, expectedBlocks: tuple[list[int], list[int], list[int
     while lines[i] != "------------ HEAP END --------------\n":
         i += 1
     heap_end = i
-    print("--- Expected blocks: ", expectedBlocks)
+    print("--- Expected chunks: ", expectedBlocks)
     print("- TINY: ", end="")
     matchBlocksSize(exctractBlocksSize(lines[tiny_heap_start:small_heap_start]), expectedBlocks[0])
     print("- SMALL: ", end="")
