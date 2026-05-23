@@ -91,7 +91,6 @@ inline static void initNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_type,
 inline static void appendNewHeap(t_heap *new_heap,
                                  const enum HEAP_TYPE heap_type) {
   t_heap **first_heap;
-  getFirstHeap(heap_type);
   switch (heap_type) {
   case TINY:
     first_heap = &g_global.tiny_first;
@@ -113,6 +112,7 @@ inline static void appendNewHeap(t_heap *new_heap,
     while (heap->next)
       heap = heap->next;
     heap->next = new_heap;
+    new_heap->prev = heap;
   }
 }
 

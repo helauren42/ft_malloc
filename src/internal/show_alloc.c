@@ -104,6 +104,7 @@ inline size_t getLargeHeapSize(t_heap *heap) {
   t_chunk *chunk = heap->first_chunk;
   while (chunk) {
     usedSize += T_CHUNK_SIZE + chunk->payload_bytes;
+    chunk = chunk->next;
   }
   size_t heapSize = PAGE_SIZE;
   while (heapSize < usedSize)

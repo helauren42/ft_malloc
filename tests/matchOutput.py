@@ -53,6 +53,11 @@ def processBlocks(out: str, expectedBlocks: tuple[list[int], list[int], list[int
     matchBlocksSize(exctractBlocksSize(lines[large_heap_start:heap_end]), expectedBlocks[2])
 
 def matchOutput(out: str, expectedBlocks: tuple[list[int], list[int], list[int]], err: str, expectedErr: str):
+    lines = err.splitlines(True);
+    for i in range(len(lines)):
+        if lines[i].find("note: this is the location of the previous definition") >= 0:
+            err = "".join(lines[i+1:])
+            break
     processBlocks(out, expectedBlocks)
     if err != expectedErr:
         print(f"{RED}\n-------- STDERR mismatch:")
