@@ -1,6 +1,8 @@
 - implement realloc
 - implement large allocation
 
+- move free_chunks list to arena
+
 - add guard
 - add history log in file if env set || print in hexadecimal
 - isolate internal functions inside another header file

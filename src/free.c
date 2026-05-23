@@ -1,14 +1,34 @@
 #include "ft_malloc.h"
 #include <sys/mman.h>
 
-inline static void mergeBlocks(t_chunk *chunk) {
-  t_chunk *next = chunk->next;
-  t_chunk *prev = chunk->prev;
+inline static t_free_chunk *freeAndMergeChunks(t_free_chunk *free_chunk) {
+  free_chunk->is_free = true;
+  t_chunk *next = free_chunk->next;
+  t_chunk *prev = free_chunk->prev;
   if (next && next->is_free) {
-    chunk->payload_bytes += next->payload_bytes + T_CHUNK_SIZE;
+    free_chunk->payload_bytes += next->payload_bytes + T_CHUNK_SIZE;
   }
   if (prev && prev->is_free) {
-    chunk->payload_bytes += prev->payload_bytes + T_CHUNK_SIZE;
+    free_chunk->payload_bytes += prev->payload_bytes + T_CHUNK_SIZE;
+    t_chunk *before = prev->prev;
+    ft_memcpy(prev, free_chunk, T_FREE_CHUNK_SIZE);
+    if (before) {
+      before->next = prev;
+      prev->prev = before;
+    }
+    return (t_free_chunk *)prev;
+  }
+  return free_chunk;
+}
+
+inline static void appendFreeChunk(t_free_chunk *new_free_chunk, t_heap *heap) {
+  if (!heap->first_free_chunk)
+    heap->first_free_chunk = new_free_chunk;
+  else {
+    t_free_chunk *free_chunk = heap->first_free_chunk;
+    while (free_chunk->next_free)
+      free_chunk = free_chunk->next_free;
+    free_chunk->next_free = new_free_chunk;
   }
 }
 
@@ -23,10 +43,11 @@ void free(void *ptr) {
     errorDoubleFree();
     return;
   }
-  chunk->is_free = true;
-  mergeBlocks(chunk);
-  t_heap *heap = chunk->heap;
+  t_free_chunk *free_chunk = freeAndMergeChunks((t_free_chunk *)chunk);
+  t_heap *heap = free_chunk->heap;
   heap->active_chunk_count--;
   if (heap->active_chunk_count == 0)
-    removeZone(chunk, heap);
+    removeHeap(heap);
+  else
+    appendFreeChunk(free_chunk, heap);
 }

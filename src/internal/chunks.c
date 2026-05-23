@@ -3,28 +3,28 @@
 #include <stdio.h>
 #include <unistd.h>
 
-inline static size_t NewFreeBlockMinSize(const enum HEAP_TYPE heap_type) {
+inline static size_t NewFreeChunkMinSize(const enum HEAP_TYPE heap_type) {
   static const size_t sizes[LARGE + 1] = {[TINY] = T_FREE_CHUNK_SIZE,
                                           [SMALL] = SMALL_MIN_PAYLOAD,
                                           [LARGE] = LARGE_MIN_PAYLOAD};
   return sizes[heap_type];
 }
 
-static inline void setFirstFreeBlock(t_heap *g_global, t_heap *heap,
+static inline void setFirstFreeChunk(t_heap *g_global, t_heap *heap,
                                      t_free_chunk *new_free_chunk) {
   heap->first_free_chunk = new_free_chunk;
   g_global->first_free_chunk = new_free_chunk;
 }
 
-static inline void setFirstBlock(t_heap *g_global, t_chunk *curr_chunk) {
+static inline void setFirstChunk(t_heap *g_global, t_chunk *curr_chunk) {
   g_global->first_chunk = (t_chunk *)curr_chunk;
 }
 
 // TODO check for heap metadata corruption
-static t_chunk *unfreeBlock(const size_t bytesNeeded, t_free_chunk *curr_chunk,
+static t_chunk *unfreeChunk(const size_t bytesNeeded, t_free_chunk *curr_chunk,
                             t_heap *heap, const enum HEAP_TYPE heap_type) {
   const size_t extra_bytes = curr_chunk->payload_bytes - bytesNeeded;
-  const bool split_chunk = extra_bytes >= NewFreeBlockMinSize(heap_type);
+  const bool split_chunk = extra_bytes >= NewFreeChunkMinSize(heap_type);
   t_heap *g_global = getHeapStart(heap_type);
   // if true we need to create new free chunk from the memory space that is left
   // otherwise the chunk will be bigger than what has been requested
@@ -39,59 +39,62 @@ static t_chunk *unfreeBlock(const size_t bytesNeeded, t_free_chunk *curr_chunk,
     new_free_chunk->next = curr_chunk->next;
     new_free_chunk->prev = (void *)curr_chunk;
     new_free_chunk->payload_bytes = extra_bytes - T_CHUNK_SIZE;
-    new_free_chunk->is_free = true, new_free_chunk->next_free = next_free;
+    new_free_chunk->is_free = true;
+    new_free_chunk->next_free = next_free;
     new_free_chunk->prev_free = prev_free;
     new_free_chunk->next_free = next_free;
 
     if (!prev_free) {
-      setFirstFreeBlock(g_global, heap, new_free_chunk);
+      setFirstFreeChunk(g_global, heap, new_free_chunk);
     } else
       prev_free->next_free = new_free_chunk;
     if (!curr_chunk->prev)
-      setFirstBlock(g_global, (t_chunk *)curr_chunk);
+      setFirstChunk(g_global, (t_chunk *)curr_chunk);
     // curr chunk
     curr_chunk->payload_bytes -= extra_bytes;
     curr_chunk->next = (void *)new_free_chunk;
   } else {
     if (!prev_free) {
-      setFirstFreeBlock(g_global, heap, next_free);
+      setFirstFreeChunk(g_global, heap, next_free);
     } else
       prev_free->next_free = next_free;
     if (!curr_chunk->prev)
-      setFirstBlock(g_global, (t_chunk *)curr_chunk);
+      setFirstChunk(g_global, (t_chunk *)curr_chunk);
   }
   // printStr("UNFREED: "); // TODO logs?
   // printAddr(curr_chunk, true);
   return (t_chunk *)curr_chunk;
 }
 
-t_chunk *allocBlock(const size_t bytesNeeded) {
+t_chunk *allocChunk(const size_t bytesNeeded) {
   const enum HEAP_TYPE heap_type = getHeapType(bytesNeeded);
-  t_heap *firstZone = getHeapStart(heap_type);
+  t_heap **firstHeap = getFirstHeap(heap_type);
   // if there is no first heap create a new heap and check it worked
-  if (!firstZone) {
-    if (!newZone(bytesNeeded))
+  if (!firstHeap || !*firstHeap) {
+    if (!newHeap(bytesNeeded))
       return debugError("Failed to create new heap\n"), NULL;
-    firstZone = getHeapStart(heap_type);
-    if (!firstZone)
-      return debugError("get first heap returned null when newZone succeeded"),
+    firstHeap = getFirstHeap(heap_type);
+    if (!firstHeap || !*firstHeap)
+      return debugError("get first heap returned null when newHeap succeeded"),
              NULL;
   }
   // iterate through heaps
-  t_heap *heap = firstZone;
+  t_heap *heap = *firstHeap;
   while (heap) {
     // iterate through chunks
     t_free_chunk *free_chunk = heap->first_free_chunk;
     while (free_chunk) {
       if (free_chunk->payload_bytes >= bytesNeeded) {
-        t_chunk *chunk = unfreeBlock(bytesNeeded, free_chunk, heap, heap_type);
+        t_chunk *chunk = unfreeChunk(bytesNeeded, free_chunk, heap, heap_type);
         if (chunk)
           heap->active_chunk_count++;
+        debugInfo("Returning allocated chunk");
         return chunk;
       }
       free_chunk = free_chunk->next_free;
     }
     heap = heap->next;
   }
+  debugError("Failed to allocatate chunk");
   return NULL;
 }

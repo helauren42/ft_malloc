@@ -22,17 +22,17 @@ typedef struct s_test {
 int main() {
   char *str = ft_malloc(sizeof(char) * 20);
   strcpy(str, "Hello World");
-  printf("%s\n", str);
-  printf("%p\n", str);
   char *s2 = ft_malloc(sizeof(char) * 250);
   strcpy(s2, "s2 Hello World");
-  printf("expecting %p\n", (void *)str - T_CHUNK_SIZE);
-  printf("expecting %p\n", (void *)s2 - T_CHUNK_SIZE);
   t_nest *nest = ft_malloc(sizeof(t_nest));
   t_test *test = ft_malloc(sizeof(t_test));
-  void *v = ft_malloc(sizeof(t_test) + 300);
   free(nest);
   free(s2);
+  void *v = ft_malloc(sizeof(t_test) + 300);
+  char *s3 = ft_malloc(sizeof(char) * 400);
+  char *s4 = ft_malloc(sizeof(char) * 280);
+  free(s3);
+  char *s5 = ft_malloc(sizeof(char) * 500);
   show_alloc_mem();
   return 0;
 }

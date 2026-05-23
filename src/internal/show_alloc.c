@@ -55,15 +55,15 @@ inline static void hexDump(const t_chunk *chunk) {
   dumpPayload(uint_ptr + T_CHUNK_SIZE, chunk->payload_bytes);
 }
 
-inline static void printBlockTitle(const unsigned int count) {
+inline static void printChunkTitle(const unsigned int count) {
   write(1, "  ", 2);
   ft_putnbr_fd(count, 1);
   write(1, "=> ", 3);
 }
 
-inline static void printBlock(const unsigned int count, const t_chunk *chunk,
+inline static void printChunk(const unsigned int count, const t_chunk *chunk,
                               const bool hex) {
-  printBlockTitle(count);
+  printChunkTitle(count);
   printAddr(chunk, false);
   printStr(" - ");
   const void *lastByteAddr =
@@ -74,18 +74,18 @@ inline static void printBlock(const unsigned int count, const t_chunk *chunk,
   printLine("");
 }
 
-inline static size_t printBlocks(t_chunk *chunk, const bool hex) {
+inline static size_t printChunks(t_chunk *chunk, const bool hex) {
   unsigned int i = 0;
   size_t bytes_used = 0;
   if (!chunk)
-    debugInfo("Block is null");
+    debugInfo("Chunk is null");
   else
-    debugInfo("Block is not null");
+    debugInfo("Chunk is not null");
   while (chunk) {
     // printAddr(chunk, true);
     if (!chunk->is_free) {
       bytes_used += chunk->payload_bytes;
-      printBlock(i, chunk, hex);
+      printChunk(i, chunk, hex);
       i++;
     }
     chunk = chunk->next;
@@ -93,13 +93,13 @@ inline static size_t printBlocks(t_chunk *chunk, const bool hex) {
   return bytes_used;
 }
 
-inline void printZoneTitle(const unsigned int count) {
-  write(1, "Zone", 4);
+inline void printHeapTitle(const unsigned int count) {
+  write(1, "Heap", 4);
   ft_putnbr_fd(count, 1);
   write(1, "=> ", 3);
 }
 
-inline size_t getLargeZoneSize(t_heap *heap) {
+inline size_t getLargeHeapSize(t_heap *heap) {
   size_t usedSize = 0;
   t_chunk *chunk = heap->first_chunk;
   while (chunk) {
@@ -111,29 +111,29 @@ inline size_t getLargeZoneSize(t_heap *heap) {
   return heapSize;
 }
 
-inline size_t getZoneSize(t_heap *heap, const enum HEAP_TYPE heap_type) {
+inline size_t getHeapSize(t_heap *heap, const enum HEAP_TYPE heap_type) {
   switch (heap_type) {
   case TINY:
     return TINY_HEAP_SIZE;
   case SMALL:
     return SMALL_HEAP_SIZE;
   case LARGE:
-    return getLargeZoneSize(heap);
+    return getLargeHeapSize(heap);
   }
   return 0;
 }
 
-inline t_mem_usage printZones(t_heap *heap, const enum HEAP_TYPE heap_type,
+inline t_mem_usage printHeaps(t_heap *heap, const enum HEAP_TYPE heap_type,
                               const bool hex) {
   // TODO
   unsigned int i = 0;
   size_t bytes_used = 0;
   size_t bytes_mapped = 0;
   while (heap) {
-    printZoneTitle(i);
+    printHeapTitle(i);
     printAddr(heap, true);
-    bytes_used += printBlocks(heap->first_chunk, hex);
-    bytes_mapped += getZoneSize(heap, heap_type);
+    bytes_used += printChunks(heap->first_chunk, hex);
+    bytes_mapped += getHeapSize(heap, heap_type);
     heap = heap->next;
     i++;
   }

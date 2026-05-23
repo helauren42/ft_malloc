@@ -5,13 +5,13 @@ void show_alloc_mem() {
   t_mem_usage toAdd = {0, 0};
 
   printLine("------------ TINY HEAP ------------");
-  toAdd = printZones(g_global.tiny_first, TINY, false);
+  toAdd = printHeaps(g_global.tiny_first, TINY, false);
   totalMem = addMem(totalMem, toAdd);
   printLine("------------ SMALL HEAP ------------");
-  toAdd = printZones(g_global.small_first, SMALL, false);
+  toAdd = printHeaps(g_global.small_first, SMALL, false);
   totalMem = addMem(totalMem, toAdd);
   printLine("------------ LARGE HEAP ------------");
-  toAdd = printZones(g_global.large_first, LARGE, false);
+  toAdd = printHeaps(g_global.large_first, LARGE, false);
   totalMem = addMem(totalMem, toAdd);
   printLine("------------ HEAP END --------------");
   printStr("Total Bytes Mapped: ");

@@ -7,7 +7,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-#define DEV 0
+#define DEV 1
 #define SECURE 0 // 0-1 if 1 then on free data will be zeroed
 
 #define PAGE_SIZE getpagesize()
@@ -66,18 +66,15 @@ typedef struct s_heap {
   unsigned int active_chunk_count; // checked on freeing to know if heap should
                                    // be unmapped
   size_t size;
-  size_t free_bytes; // check on allocation to know if the heap potentially
-                     // has a big enough chunk left or not but actually
-                     // first_free_chunk might be enough for this
 } t_heap;
 
 typedef struct s_arenas {
   t_heap *tiny_first;
   t_heap *small_first;
   t_heap *large_first;
-  t_heap *tiny_last;
-  t_heap *small_last;
-  t_heap *large_last;
+  // t_heap *tiny_last;
+  // t_heap *small_last;
+  // t_heap *large_last;
   enum FUNCTION_CALLED function_called;
 } t_arenas;
 
@@ -98,20 +95,20 @@ void show_alloc_mem();
 void show_alloc_mem_ex();
 
 // SHOW ALLOC
-void printZoneTitle(const unsigned int count);
-size_t getLargeZoneSize(t_heap *heap);
-size_t getZoneSize(t_heap *heap, const enum HEAP_TYPE heap_type);
-t_mem_usage printZones(t_heap *heap, const enum HEAP_TYPE heap_type,
+void printHeapTitle(const unsigned int count);
+size_t getLargeHeapSize(t_heap *heap);
+size_t getHeapSize(t_heap *heap, const enum HEAP_TYPE heap_type);
+t_mem_usage printHeaps(t_heap *heap, const enum HEAP_TYPE heap_type,
                        const bool hex);
 t_mem_usage addMem(const t_mem_usage a, const t_mem_usage b);
 
 // HEAPS
-t_heap *newZone(const size_t size);
-t_heap **getFirstZone(const enum HEAP_TYPE heap_type);
-void removeZone(t_chunk *chunk, t_heap *heap);
+t_heap *newHeap(const size_t bytesRequested);
+t_heap **getFirstHeap(const enum HEAP_TYPE heap_type);
+void removeHeap(t_heap *heap);
 
 // CHUNKS
-t_chunk *allocBlock(const size_t bytesNeeded);
+t_chunk *allocChunk(const size_t bytesNeeded);
 
 // UTILS
 enum HEAP_TYPE getHeapType(const size_t bytesNeeded);
@@ -133,6 +130,7 @@ char *ft_strcpy(char *dest, char *src);
 void ft_bzero(void *dst, const size_t n);
 void ft_putnbr_fd(long n, int fd);
 void ft_putsize_t(size_t n, int fd);
+void *ft_memcpy(void *dst, const void *src, size_t n);
 
 // PRINT
 void printLine(const char *str);

@@ -1,5 +1,6 @@
 #include "ft_malloc.h"
 #include <stddef.h>
+#include <stdint.h>
 
 inline enum HEAP_TYPE getHeapType(const size_t bytesNeeded) {
   if (bytesNeeded <= TINY_MAX_PAYLOAD)
@@ -18,6 +19,7 @@ inline t_heap *getHeapStart(const enum HEAP_TYPE heap_type) {
   case LARGE:
     return g_global.large_first;
   }
+  debugError("getHeapStart error");
   return NULL;
 }
 
@@ -25,7 +27,7 @@ inline void *getPayloadAddr(t_chunk *chunk) {
   return (void *)chunk + T_CHUNK_SIZE;
 }
 
-inline t_chunk *getHeaderAddr(void *payload) {
+inline t_chunk *getHeaderAddr(void *payloadAddr) {
   // TODO check metadata
-  return (void *)payload - T_CHUNK_SIZE;
+  return (t_chunk *)((uintptr_t)payloadAddr - T_CHUNK_SIZE);
 }
