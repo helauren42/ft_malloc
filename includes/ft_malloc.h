@@ -50,7 +50,7 @@ typedef struct s_chunk {
 typedef struct s_free_chunk {
   t_chunk *next;
   t_chunk *prev;
-  void *heap;
+  t_heap *heap;
   size_t payload_bytes;
   bool is_free;
   t_free_chunk *next_free;
@@ -88,7 +88,7 @@ typedef struct s_mem_usage {
 extern t_arenas g_global;
 
 // MAIN
-void free(void *ptr);
+void ft_free(void *ptr);
 void *ft_malloc(size_t size);
 void *realloc(void *ptr, size_t size);
 void show_alloc_mem();
@@ -123,6 +123,7 @@ void errorDoubleFree();
 // DEBUGS
 void debugError(char *str);
 void debugInfo(char *str);
+void printFreeChunks(const t_heap *heap);
 
 // LIBFT
 int ft_strlen(const char *str);

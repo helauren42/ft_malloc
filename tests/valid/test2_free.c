@@ -1,5 +1,4 @@
 #include "ft_malloc.h"
-#include <stdio.h>
 #include <string.h>
 
 // testing allocs of all sizes
@@ -26,12 +25,12 @@ int main() {
   strcpy(s2, "s2 Hello World");
   t_nest *nest = ft_malloc(sizeof(t_nest));
   t_test *test = ft_malloc(sizeof(t_test));
-  free(nest);
-  free(s2);
+  ft_free(nest);
+  ft_free(s2);
   void *v = ft_malloc(sizeof(t_test) + 300);
   char *s3 = ft_malloc(sizeof(char) * 400);
   char *s4 = ft_malloc(sizeof(char) * 280);
-  free(s3);
+  ft_free(s3);
   char *s5 = ft_malloc(sizeof(char) * 500);
   show_alloc_mem();
   return 0;

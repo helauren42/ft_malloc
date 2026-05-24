@@ -5,8 +5,6 @@ from calculateExpectedBlocks import calculateExpectedBlocks
 from utils import CC_RUN_FILE
 from matchOutput import matchOutput
 
-VALID_TESTS = ["test0_tiny_small.c", "test1_structs.c", "test2_free.c"]
-
 def getTestFiles(dirName: str):
     l = os.listdir(dirName)
     l.sort()
@@ -27,5 +25,7 @@ def runTests(tests: list[str]):
         print("TEST: ", filename)
         matchOutput(out, expectedBlocks, err, "")
 
+print("------ VALID TESTS ------")
 runTests(getTestFiles("valid"))
-# runTests(getTestFiles("invalid"))
+print("----- INVALID TESTS -----")
+runTests(getTestFiles("invalid"))

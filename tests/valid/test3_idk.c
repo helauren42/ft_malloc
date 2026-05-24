@@ -27,8 +27,8 @@ int main() {
   printf("expecting %p\n", (void *)str - T_CHUNK_SIZE);
   printf("expecting %p\n", (void *)s2 - T_CHUNK_SIZE);
   t_nest *nest = ft_malloc(sizeof(t_nest));
-  free(nest);
-  free(s2);
+  ft_free(nest);
+  ft_free(s2);
   show_alloc_mem();
   return 0;
 }

@@ -143,7 +143,7 @@ inline t_mem_usage printHeaps(t_heap *heap, const enum HEAP_TYPE heap_type,
 }
 
 inline t_mem_usage addMem(const t_mem_usage a, const t_mem_usage b) {
-  const t_mem_usage total = {a.bytes_mapped + b.bytes_mapped,
-                             a.bytes_used + b.bytes_used};
+  t_mem_usage total = {a.bytes_mapped + b.bytes_mapped,
+                       a.bytes_used + b.bytes_used};
   return total;
 }

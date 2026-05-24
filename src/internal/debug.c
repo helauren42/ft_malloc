@@ -15,3 +15,30 @@ inline void debugError(char *str) {
   write(STDERR_FILENO, str, ft_strlen(str));
   write(STDERR_FILENO, "\n", 1);
 }
+
+inline void printFreeChunks(const t_heap *heap) {
+  t_free_chunk *chunk = heap->first_free_chunk;
+  printStr("Free chunks for heap ");
+  printAddr(heap, true);
+  while (chunk) {
+    printStr("  Chunk ");
+    printAddr(chunk, true);
+    printStr("    next:         ");
+    printAddr(chunk->next, true);
+    printStr("    prev:         ");
+    printAddr(chunk->prev, true);
+    printStr("    heap:         ");
+    printAddr(chunk->heap, true);
+    printStr("    payload_size: ");
+    ft_putsize_t(chunk->payload_bytes, 1);
+    printLine("");
+    printStr("    is_free:      ");
+    ft_putnbr_fd(chunk->is_free, 1);
+    printLine("");
+    printStr("    next_free:    ");
+    printAddr(chunk->next_free, true);
+    printStr("    prev_free:    ");
+    printAddr(chunk->prev_free, true);
+    chunk = chunk->next_free;
+  }
+}
