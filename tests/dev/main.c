@@ -31,7 +31,7 @@ int main() {
   ft_free(small3);
   ft_free(small1);
   tiny1 = ft_malloc(sizeof(char) * 80);
-  tiny2 = ft_malloc(sizeof(char) * 105); // issue
+  tiny2 = ft_malloc(sizeof(char) * 105);
   tiny3 = ft_malloc(sizeof(t_nest));
   tiny4 = ft_malloc(sizeof(t_test));
   small1 = ft_malloc(sizeof(char) * 651);

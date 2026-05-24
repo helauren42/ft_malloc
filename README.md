@@ -1,6 +1,7 @@
 # ft_malloc
 
-If you want the lsp to function properly update the `directory` parameter inside the  `/home/henri/Projects/ft_malloc/compile_commands.json` to the absolute path of the root directory of the project on your machine.
+Just building a custom malloc implementation to dive into the inner workings of malloc.
+This is still in development, this README is incomplete.
 
 # Description
 
@@ -9,6 +10,11 @@ If you want the lsp to function properly update the `directory` parameter inside
 **Chunks (t_chunk)**: Inline headers that track allocation size and state.
 
 **Intrusive Free List**: When a chunk is freed, the empty payload area is used to store navigation pointers without increasing metadata overhead.
+
+## Free
+
+Everytime we free a chunk we either use the neighbouring free chunks that we defragment to make the freed memory available again or we prepend it to the free_chunks list if we could not insert it back through defragmentation.
+The free_chunks list is expected to be short in most common scenarios while the all chunks list is expected to be long and with every chunk one right after the other in memory, which is not the case of the free chunks they are not next to each other in the mapped ram space. Which is why we prepend them to the free_chunks list on free.
 
 # Errors
 
@@ -75,3 +81,8 @@ https://course.ccs.neu.edu/cs3650sp23/a07.html
 https://cs.wellesley.edu/~cs240/f23/slides/malloc.pdf
 
 og: https://www.yumpu.com/en/document/read/5857476/a-malloc-tutorial/7
+
+# PS
+
+If you want the lsp to function properly update the `directory` parameter inside the  `/home/henri/Projects/ft_malloc/compile_commands.json` to the absolute path of the root directory of the project on your machine.
+

@@ -31,7 +31,7 @@ update_source:
 	python ./scripts/update_makefile_srcs.py
 
 dev: $(NAME) clean
-	$(CC) -g3 -I ./includes ./tests/dev/main.c -L. -lft_malloc -Wl,-rpath,. && ./a.out && $(RM) a.out
+	$(CC) -g3 -I ./includes ./tests/dev/main.c -L. -lft_malloc -Wl,-rpath,. && gdb ./a.out && $(RM) a.out
 
 # TODO add test later where it actually uses .so
 # dev: $(NAME)

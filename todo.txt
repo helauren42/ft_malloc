@@ -3,6 +3,7 @@
 
 - move free_chunks list to arena
 
-- add guard
+- add guard / or chunk validation function
 - add history log in file if env set || print in hexadecimal
 - isolate internal functions inside another header file
+- add ENV param to reset chunk payload on free using memset

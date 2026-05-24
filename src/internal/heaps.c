@@ -65,6 +65,7 @@ inline static void initNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_type,
   new_heap->next = NULL;
   new_heap->prev = NULL; // prev is set inside appendNewHeap
   new_heap->first_free_chunk = (void *)new_heap + T_HEAP_SIZE;
+  new_heap->first_chunk = NULL;
   new_heap->active_chunk_count = 0;
   new_heap->size = newHeapSize(bytesRequested, heap_type);
   // first_free_chunk
@@ -132,6 +133,7 @@ inline t_heap *newHeap(const size_t bytesRequested) {
 }
 
 inline void removeHeap(t_heap *heap) {
+  debugInfo("REMOVING HEAP");
   t_heap *prev = heap->prev;
   t_heap *next = heap->next;
   if (prev) {
