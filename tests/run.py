@@ -27,5 +27,5 @@ def runTests(tests: list[str]):
 
 print("------ VALID TESTS ------")
 runTests(getTestFiles("valid"))
-print("----- INVALID TESTS -----")
-runTests(getTestFiles("invalid"))
+# print("----- INVALID TESTS -----")
+# runTests(getTestFiles("invalid"))

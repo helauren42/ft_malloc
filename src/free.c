@@ -1,16 +1,19 @@
 #include "ft_malloc.h"
+#include <stdbool.h>
+#include <stdint.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
-inline static void mergeNext(t_free_chunk *new_free) {
-  t_free_chunk *next_free = (t_free_chunk *)new_free->next;
-  if (!next_free || !next_free->is_free)
-    return;
-  new_free->payload_bytes += next_free->payload_bytes + T_CHUNK_SIZE;
-  new_free->next = next_free->next;
-  new_free->next_free = next_free->next_free;
-  if (next_free->next_free)
-    next_free->next_free->prev_free = new_free;
+inline static bool mergeNext(t_free_chunk *new_free) {
+  t_free_chunk *next = (t_free_chunk *)new_free->next;
+  if (!next || !next->is_free)
+    return false;
+  new_free->payload_bytes += next->payload_bytes + T_CHUNK_SIZE;
+  new_free->next = next->next;
+  new_free->next_free = next->next_free;
+  if (next->next_free)
+    next->next_free->prev_free = new_free;
+  return true;
 }
 
 inline static t_free_chunk *mergePrev(t_free_chunk *new_free) {
@@ -32,21 +35,20 @@ inline static t_free_chunk *mergePrev(t_free_chunk *new_free) {
   return (t_free_chunk *)prev_free;
 }
 
-// inline static void prependFreeChunk(t_free_chunk *new_free_chunk,
-//                                     t_heap *heap) {
-//   new_free_chunk->next_free = heap->first_free_chunk;
-//   if (!heap->first_free_chunk)
-//     heap->first_free_chunk = new_free_chunk;
-//   else {
-//     new_free_chunk->next_free = heap->first_free_chunk;
-//     heap->first_free_chunk = new_free_chunk;
-//   }
-// }
+inline static void prependFreeChunk(t_free_chunk *new_free_chunk,
+                                    t_heap *heap) {
+  new_free_chunk->next_free = heap->first_free_chunk;
+  if (!heap->first_free_chunk)
+    heap->first_free_chunk = new_free_chunk;
+  else {
+    new_free_chunk->next_free = heap->first_free_chunk;
+    heap->first_free_chunk = new_free_chunk;
+  }
+}
 
 void ft_free(void *ptr) {
   if (!ptr)
     return;
-  printLine("CALLED FREE");
   g_global.function_called = FREE;
   t_chunk *chunk = getHeaderAddr(ptr);
   // printStr("Freeding this addr:"); // TODO logs?
@@ -61,14 +63,12 @@ void ft_free(void *ptr) {
     removeHeap(heap);
     return;
   }
-  // if heap still active then free chunk and try to defragment
   chunk->is_free = true;
   t_free_chunk *new_free = mergePrev((t_free_chunk *)chunk);
-  new_free->is_free = true;
-  mergeNext(new_free);
-  // else {
-  //   prependFreeChunk(new_free, heap);
-  // }
+  // if merged than there is no need to preprend
+  if ((uintptr_t)new_free != (uintptr_t)chunk || mergeNext(new_free))
+    return;
+  prependFreeChunk(new_free, heap);
   printLine("End of free");
   printFreeChunks(heap);
 }

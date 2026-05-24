@@ -20,12 +20,12 @@ static inline void setFirstChunk(t_heap *g_global, t_chunk *curr_chunk) {
   g_global->first_chunk = (t_chunk *)curr_chunk;
 }
 
-inline static void createNewFreeChunk(const size_t bytesNeeded,
-                                      t_free_chunk *curr_chunk, t_heap *heap,
-                                      t_free_chunk *prev_free,
-                                      t_free_chunk *next_free,
-                                      const size_t extra_bytes,
-                                      t_heap *g_global) {
+inline static void addNewFreeChunk(const size_t bytesNeeded,
+                                   t_free_chunk *curr_chunk, t_heap *heap,
+                                   t_free_chunk *prev_free,
+                                   t_free_chunk *next_free,
+                                   const size_t extra_bytes,
+                                   t_heap *g_global) {
   // new free chunk
   t_free_chunk *new_free_chunk =
       (void *)(curr_chunk) + T_CHUNK_SIZE + bytesNeeded;
@@ -37,16 +37,19 @@ inline static void createNewFreeChunk(const size_t bytesNeeded,
   new_free_chunk->prev_free = prev_free;
   new_free_chunk->next_free = next_free;
   new_free_chunk->heap = heap;
-
-  if (!prev_free) {
-    setFirstFreeChunk(g_global, heap, new_free_chunk);
-  } else
-    prev_free->next_free = new_free_chunk;
-  if (!curr_chunk->prev)
-    setFirstChunk(g_global, (t_chunk *)curr_chunk);
   // curr chunk
   curr_chunk->payload_bytes -= extra_bytes;
   curr_chunk->next = (void *)new_free_chunk;
+
+  // relink  next_free chunk
+  if (next_free)
+    next_free->prev_free = new_free_chunk;
+  // relink  prev_free chunk
+  if (!prev_free || heap->first_free_chunk == curr_chunk) {
+    setFirstFreeChunk(g_global, heap, new_free_chunk);
+  } else {
+    prev_free->next_free = new_free_chunk;
+  }
 }
 
 // TODO check for heap metadata corruption
@@ -62,18 +65,19 @@ static t_chunk *unfreeChunk(const size_t bytesNeeded, t_free_chunk *curr_chunk,
   t_free_chunk *prev_free = curr_chunk->prev_free;
   t_free_chunk *next_free = curr_chunk->next_free;
   if (split_chunk) {
-    createNewFreeChunk(bytesNeeded, curr_chunk, heap, prev_free, next_free,
-                       extra_bytes, g_global);
+    addNewFreeChunk(bytesNeeded, curr_chunk, heap, prev_free, next_free,
+                    extra_bytes, g_global);
   } else {
     if (!prev_free) {
       setFirstFreeChunk(g_global, heap, next_free);
     } else {
       prev_free->next_free = next_free;
-      next_free->prev_free = prev_free;
+      if (next_free)
+        next_free->prev_free = prev_free;
     }
-    if (!curr_chunk->prev)
-      setFirstChunk(g_global, (t_chunk *)curr_chunk);
   }
+  if (!curr_chunk->prev || heap->first_chunk == NULL)
+    setFirstChunk(g_global, (t_chunk *)curr_chunk);
   // printStr("UNFREED: "); // TODO logs?
   // printAddr(curr_chunk, true);
   return (t_chunk *)curr_chunk;
@@ -98,11 +102,11 @@ t_chunk *allocChunk(const size_t bytesNeeded) {
     t_free_chunk *free_chunk = heap->first_free_chunk;
     while (free_chunk) {
       if (free_chunk->payload_bytes >= bytesNeeded) {
-        t_chunk *chunk = unfreeChunk(bytesNeeded, free_chunk, heap, heap_type);
-        if (chunk)
+        t_chunk *new_chunk = unfreeChunk(bytesNeeded, free_chunk, heap, heap_type);
+        if (new_chunk)
           heap->active_chunk_count++;
         debugInfo("Returning allocated chunk");
-        return chunk;
+        return new_chunk;
       }
       free_chunk = free_chunk->next_free;
     }

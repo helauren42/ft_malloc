@@ -30,9 +30,13 @@
 
 #define PAYLOAD_SIZE(chunk_bytes) chunk_bytes - T_CHUNK_SIZE
 
-enum HEAP_TYPE { TINY, SMALL, LARGE };
+enum HEAP_TYPE { TINY,
+                 SMALL,
+                 LARGE };
 
-enum FUNCTION_CALLED { MALLOC, REALLOC, FREE };
+enum FUNCTION_CALLED { MALLOC,
+                       REALLOC,
+                       FREE };
 
 typedef struct s_chunk t_chunk;
 typedef struct s_free_chunk t_free_chunk;
@@ -131,7 +135,6 @@ char *ft_strcpy(char *dest, char *src);
 void ft_bzero(void *dst, const size_t n);
 void ft_putnbr_fd(long n, int fd);
 void ft_putsize_t(size_t n, int fd);
-void *ft_memcpy(void *dst, const void *src, size_t n);
 
 // PRINT
 void printLine(const char *str);

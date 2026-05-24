@@ -10,6 +10,11 @@ If you want the lsp to function properly update the `directory` parameter inside
 
 **Intrusive Free List**: When a chunk is freed, the empty payload area is used to store navigation pointers without increasing metadata overhead.
 
+## Free
+
+Everytime we free a chunk we either use the neighbouring free chunks that we defragment to make the freed memory available again or we prepend it to the free_chunks list if we could not insert it back through defragmentation.
+The free_chunks list is expected to be short in most common scenarios while the all chunks list is expected to be long and with every chunk one right after the other in memory, which is not the case of the free chunks they are not next to each other in the mapped ram space. Which is why we prepend them to the free_chunks list on free.
+
 # Errors
 
 The following errors are being handled.
