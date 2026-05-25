@@ -48,9 +48,9 @@ def allocAmount(input: str)-> int:
     if hasOperators(input) is False:
         return int(input.strip()) if not input.startswith("sizeof(") else retrieveSize(input[7:-1])
     parts = input.split(" ")
-    # should probably do some recusive computation to calculate the amount instead of just handling len 1 or len 3
+    # should do some recusive computation to calculate the amount instead of just handling len 1 and len 3
     if len(parts) != 3:
-        raise ValueError(f"Nah not handling this: {parts}")
+        raise ValueError(f"Nah not handling this at least for now: {parts}")
     elements = []
     for i in range(len(parts)):
         parts[i] = parts[i].strip()

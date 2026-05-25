@@ -1,7 +1,7 @@
 import utils
 from parseAllocAmount import allocAmount
 
-allocs: dict[str,int] = {}
+allocs: dict[str,list[int]] = {}
 
 def handleFree(line: str):
     start: int = line.find("free(")
@@ -11,7 +11,7 @@ def handleFree(line: str):
     if end < 0:
         raise Exception("Free parsing issue")
     varName = line[start+5:end]
-    allocs.pop(varName)
+    allocs[varName].pop()
 
 def getAllocs(filename: str):
     global allocs
@@ -26,6 +26,8 @@ def getAllocs(filename: str):
         lines = f.readlines()
         utils.C_FILE_CONTENT = lines
         for line in lines:
+            if line.strip().startswith("// "):
+                continue
             mallocStart = line.find("malloc(")
             if mallocStart < 0:
                 handleFree(line)
@@ -35,7 +37,10 @@ def getAllocs(filename: str):
                 raise Exception("Malloc parsing issue")
             amount = allocAmount(line[mallocStart+7:mallocEnd])
             varName = getVarName(line)
-            allocs[varName] = amount
+            if allocs.get(varName):
+                allocs[varName].append(amount)
+            else:
+                allocs[varName] = [amount]
 
 def zoneMaxPayloads():
     path = "../includes/ft_malloc.h"
@@ -55,13 +60,14 @@ def sortAllocs(zoneMax: tuple[int, int])->tuple[list[int], list[int], list[int]]
     tinyHeap = []
     smallHeap = []
     largeHeap = []
-    for _, alloc in allocs.items():
-        if alloc <= zoneMax[0]:
-            tinyHeap.append(alloc)
-        elif alloc <= zoneMax[1]:
-            smallHeap.append(alloc)
-        else:
-            largeHeap.append(alloc)
+    for _, l in allocs.items():
+        for alloc in l:
+            if alloc <= zoneMax[0]:
+                tinyHeap.append(alloc)
+            elif alloc <= zoneMax[1]:
+                smallHeap.append(alloc)
+            else:
+                largeHeap.append(alloc)
     return (tinyHeap, smallHeap, largeHeap)
 
 def calculateExpectedBlocks(filename: str):

@@ -60,6 +60,7 @@ void ft_free(void *ptr) {
   t_heap *heap = chunk->heap;
   heap->active_chunk_count--;
   if (heap->active_chunk_count == 0) {
+    debugInfo("!!!!! REMOVING HEAP");
     removeHeap(heap);
     return;
   }
@@ -69,6 +70,5 @@ void ft_free(void *ptr) {
   if ((uintptr_t)new_free != (uintptr_t)chunk || mergeNext(new_free))
     return;
   prependFreeChunk(new_free, heap);
-  printLine("End of free");
   printFreeChunks(heap);
 }

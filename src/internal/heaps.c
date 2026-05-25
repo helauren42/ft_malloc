@@ -6,20 +6,6 @@
 
 t_arenas g_global = {NULL, NULL, NULL, 0};
 
-// inline static t_heap **getLastHeap(const enum HEAP_TYPE heap_type) {
-//   switch (heap_type) {
-//   case TINY:
-//     return &g_global.tiny_last;
-//   case SMALL:
-//     return &g_global.small_last;
-//   case LARGE:
-//     return &g_global.large_last;
-//   default:
-//     debugError("getFirstHeap default case");
-//     return NULL;
-//   }
-// }
-
 inline t_heap **getFirstHeap(const enum HEAP_TYPE heap_type) {
   switch (heap_type) {
   case TINY:

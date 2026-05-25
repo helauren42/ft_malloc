@@ -30,12 +30,10 @@ re: fclean all
 update_source:
 	python ./scripts/update_makefile_srcs.py
 
-dev: $(NAME) clean
-	$(CC) -g3 -I ./includes ./tests/dev/main.c -L. -lft_malloc -Wl,-rpath,. && gdb ./a.out && $(RM) a.out
+dev: $(NAME)
+	$(MAKE) -C tests dev
 
 # TODO add test later where it actually uses .so
-# dev: $(NAME)
-# 	$(CC) -g3 -I ./includes ./tests/test0.c -L. -lft_malloc && ./a.out && $(RM) a.out
 test: $(NAME) clean
 	$(MAKE) -C tests run
 

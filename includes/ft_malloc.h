@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef FT_MALLOC
 #define FT_MALLOC
 
@@ -7,7 +11,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-#define DEV 1
+#define DEV 0
 #define SECURE 0 // 0-1 if 1 then on free data will be zeroed
 
 #define PAGE_SIZE getpagesize()
@@ -141,4 +145,8 @@ void printLine(const char *str);
 void printStr(const char *str);
 void printAddr(const void *addr, const bool newline);
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
