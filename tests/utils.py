@@ -1,7 +1,0 @@
-C_FILE_CONTENT: list[str] = []
-FILENAME: str = ""
-
-
-def CC_RUN_FILE(filename: str)-> str:
-    return f"cc -g3 -I ./includes ./tests/{filename} -DDEV=0 -L. -lft_malloc -Wl,-rpath,. && ./a.out && /bin/rm a.out"
-
