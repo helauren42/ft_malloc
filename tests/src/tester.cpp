@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <fstream>
@@ -9,87 +11,174 @@
 #include <sstream>
 #include <stdexcept>
 #include <utility>
+#include <vector>
 
 #include "ft_malloc.h"
 
 using namespace std;
 
-class Tester {
+inline constexpr const char *RED = "\033[31m";
+inline constexpr const char *GREEN = "\033[32m";
+inline constexpr const char *RESET = "\033[0m";
+
+class Validation {
+private:
+  inline const std::string stringifyVec(vector<uintptr_t> &ptrs) {
+    if (ptrs.empty())
+      return "[]";
+    stringstream ss;
+    ss << "[";
+    size_t i = 0;
+    size_t last = ptrs.size();
+    for (size_t i = 0; i < ptrs.size(); i++) {
+      ss << "0x" << hex << (ptrs[i]);
+      if (i < ptrs.size() - 1)
+        ss << ", ";
+    }
+    ss << "]";
+    return ss.str();
+  }
+
+  inline void printDiff(vector<uintptr_t> &expecting, vector<uintptr_t> &outcome) {
+    cout << RED << "  Expected: " << stringifyVec(expecting) << endl;
+    cout << RED << "  Received: " << stringifyVec(outcome) << endl;
+    vector<uintptr_t> minus;
+    set_difference(expecting.begin(), expecting.end(), outcome.begin(), outcome.end(), back_inserter(minus));
+    if (!minus.size())
+      return;
+    cout << RED << "  -Diff: " << endl
+         << "    ";
+    for (size_t i = 0; i < minus.size(); i++) {
+      cout << hex << minus[i];
+      if (i < minus.size() - 1)
+        cout << ", ";
+    }
+    cout << RESET << endl;
+    vector<uintptr_t> plus;
+    set_difference(outcome.begin(), outcome.end(), expecting.begin(), expecting.end(), back_inserter(plus));
+    if (!plus.size())
+      return;
+    cout << RED << "  +Diff: " << endl
+         << "    ";
+    for (size_t i = 0; i < plus.size(); i++) {
+      cout << hex << plus[i];
+      if (i < plus.size() - 1)
+        cout << ", ";
+    }
+    cout << RESET << endl;
+  }
+
+  inline void heap_validation_error_title(bool &status) {
+    if (!status)
+      return;
+    cerr << RED << "  Error with arena" << RESET << endl;
+    status = false;
+  }
+  inline void getArena(vector<uintptr_t> &vec, t_heap *c_heap) {
+    while (c_heap) {
+      t_chunk *chunk = c_heap->first_chunk;
+      size_t activeChunks = 0;
+      while (chunk) {
+        if (!chunk->is_free) {
+          vec.push_back((uintptr_t)chunk);
+          activeChunks++;
+        }
+        chunk = chunk->next;
+      }
+      if (activeChunks != c_heap->active_chunk_count)
+        throw runtime_error("active_chunk_count error");
+      c_heap = c_heap->next;
+    }
+    sort(vec.begin(), vec.end());
+  }
+  inline void validate_arena(vector<uintptr_t> &expecting, vector<uintptr_t> &outcome) {
+    bool status = true;
+    if (expecting.size() != outcome.size()) {
+      heap_validation_error_title(status);
+      printDiff(expecting, outcome);
+      return;
+    }
+    size_t len = expecting.size();
+    for (size_t i = 0; i < len; i++) {
+      if (expecting[i] != outcome[i]) {
+        heap_validation_error_title(status);
+        printDiff(expecting, outcome);
+        return;
+      }
+    }
+    cout << GREEN << "  Success" << RESET << endl;
+  }
+
+public:
+  inline void validate_result(vector<uintptr_t> &tiny, vector<uintptr_t> &small, vector<uintptr_t> &large) {
+    sort(tiny.begin(), tiny.end());
+    sort(small.begin(), small.end());
+    sort(large.begin(), large.end());
+    vector<uintptr_t> tiny_arena;
+    vector<uintptr_t> small_arena;
+    vector<uintptr_t> large_arena;
+    getArena(tiny_arena, g_global.tiny_first);
+    getArena(small_arena, g_global.small_first);
+    getArena(large_arena, g_global.large_first);
+    cout << "Tiny: " << endl;
+    validate_arena(tiny, tiny_arena);
+    cout << "Small: " << endl;
+    validate_arena(small, small_arena);
+    cout << "Large: " << endl;
+    validate_arena(large, large_arena);
+  }
+};
+
+class Tester : Validation {
 private:
   map<uintptr_t, size_t> reachables;
   map<uintptr_t, size_t> unreachables;
   queue<uintptr_t> doubleFrees;
+  vector<uintptr_t> tiny;
+  vector<uintptr_t> small;
+  vector<uintptr_t> large;
 
   inline bool rmReachable(const uintptr_t &ptr) {
-    for (auto it = this->reachables.rbegin(); it != this->reachables.rend(); it++) {
+    for (auto it = reachables.rbegin(); it != reachables.rend(); it++) {
       if (it->first == ptr) {
-        this->reachables.erase(it->first);
+        reachables.erase(it->first);
         return true;
       }
     }
     return false;
   }
   inline void addUnreachable(const uintptr_t ptr, const size_t &size) {
-    this->unreachables[ptr] = size;
+    unreachables[ptr] = size;
   }
   inline void addReachable(const uintptr_t ptr, const size_t &size) {
-    this->reachables.insert_or_assign((uintptr_t)ptr, size);
+    reachables.insert_or_assign((uintptr_t)ptr, size);
   }
 
-  inline const std::string stringifyQueue(queue<size_t> &q) {
-    if (q.empty())
-      return "[]";
-    stringstream ss;
-    ss << "[";
-    while (q.size() > 0) {
-      ss << "0x" << hex << (q.front() - T_CHUNK_SIZE);
-      if (q.size() > 1)
-        ss << ", ";
-      q.pop();
-    }
-    ss << "]";
-    return ss.str();
-  }
-
-  inline const string expectedOutString(const map<uintptr_t, size_t> &allLeaks) {
-    queue<size_t> tiny;
-    queue<size_t> small;
-    queue<size_t> large;
+  inline void init_expected_arenas() {
+    reachables.merge(unreachables);
+    map<uintptr_t, size_t> allLeaks = reachables;
     for (const auto &[ptr, size] : allLeaks) {
       if (size <= TINY_MAX_PAYLOAD)
-        tiny.push(ptr);
+        tiny.push_back(ptr - T_CHUNK_SIZE);
       else if (size <= SMALL_MAX_PAYLOAD)
-        small.push(ptr);
+        small.push_back(ptr - T_CHUNK_SIZE);
       else
-        large.push(ptr);
+        large.push_back(ptr - T_CHUNK_SIZE);
     }
-    string ret = this->stringifyQueue(tiny) + "\n";
-    ret += this->stringifyQueue(small) + "\n";
-    ret += this->stringifyQueue(large) + "\n";
-    cout << "RET: " << ret << endl;
-    return ret;
-  }
-  inline void output_expectations() {
-    this->reachables.merge(this->unreachables);
-    map<uintptr_t, size_t> allLeaks = this->reachables;
-    ofstream file;
-    file.open("expected_outputs.txt", ios_base::trunc | ios_base::out);
-    if (!file.is_open())
-      throw runtime_error("Failed to open file: expected_outputs.txt");
-    std::string out = this->expectedOutString(allLeaks);
-    file.write(out.c_str(), out.size());
   }
 
 public:
   Tester() {};
   ~Tester() {
-    output_expectations();
+    init_expected_arenas();
+    validate_result(tiny, small, large);
   };
+
   void *wrap_malloc(const size_t &size, const uintptr_t ptr) {
     // process old address
     if (ptr) {
-      const auto &leaking = this->reachables.find(ptr);
-      if (leaking != this->reachables.end())
+      const auto &leaking = reachables.find(ptr);
+      if (leaking != reachables.end())
         addUnreachable(leaking->first, leaking->second);
     }
     // process new address
@@ -97,9 +186,10 @@ public:
     addReachable(new_ptr, size);
     return (void *)new_ptr;
   }
+
   void wrap_free(void *ptr) {
     const uintptr_t uintptr = (const uintptr_t)ptr;
-    if (!this->rmReachable(uintptr))
+    if (!rmReachable(uintptr))
       doubleFrees.push(uintptr);
     ft_free(ptr);
   }

@@ -2,6 +2,8 @@
 - implement large allocation
 
 - move free_chunks list to arena
+- use prev_size and next_size instead of pointers
+- make payload_bytes a multiple of 8 at all times
 
 - add guard / or chunk validation function
 - add history log in file if env set || print in hexadecimal
