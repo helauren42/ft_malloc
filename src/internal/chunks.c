@@ -111,8 +111,6 @@ t_chunk *allocChunk(const size_t bytesNeeded) {
       free_chunk = free_chunk->next_free;
     }
     heap = heap->next;
-    printStr("Heap addr: ");
-    printAddr(heap, true);
   }
   debugError("Failed to allocatate chunk");
   return NULL;

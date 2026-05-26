@@ -59,7 +59,7 @@ void ft_free(void *ptr) {
   }
   t_heap *heap = chunk->heap;
   heap->active_chunk_count--;
-  if (heap->active_chunk_count == 0) {
+  if (heap->active_chunk_count == 0 && (heap->next || heap->prev)) {
     debugInfo("!!!!! REMOVING HEAP");
     removeHeap(heap);
     return;
