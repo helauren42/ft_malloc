@@ -1,8 +1,6 @@
 #include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
-#include <fstream>
 #include <ios>
 #include <iostream>
 #include <iterator>
@@ -21,6 +19,20 @@ inline constexpr const char *RED = "\033[31m";
 inline constexpr const char *GREEN = "\033[32m";
 inline constexpr const char *RESET = "\033[0m";
 
+typedef struct s_nest {
+  void *anything_else;
+  void *something_else;
+  char d;
+  int a;
+} t_nest;
+
+typedef struct s_test {
+  t_nest *nest;
+  void *anything;
+  void *something;
+  char c;
+  int b;
+} t_test;
 class Validation {
 private:
   inline const std::string stringifyVec(vector<uintptr_t> &ptrs) {

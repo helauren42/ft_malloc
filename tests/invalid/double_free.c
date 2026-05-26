@@ -11,6 +11,8 @@ int main() {
   strcpy(s2, "s2 Hello World");
   ft_free(s2);
   ft_free(s2);
+  ft_free(str);
+  ft_free(str);
   show_alloc_mem();
   return 0;
 }

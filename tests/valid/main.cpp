@@ -1,8 +1,6 @@
 #include "../src/tester.cpp"
 #include "ft_malloc.h"
 
-// testing allocs of all sizes
-
 int main() {
   Tester tester = Tester();
   char *tiny1 = (char *)tester.wrap_malloc(sizeof(char) * 82, 0);
