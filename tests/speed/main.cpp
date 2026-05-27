@@ -6,7 +6,7 @@
 #include <ctime>
 #include <stdexcept>
 
-#define SPEED_TEST_XXX_SIZE 500
+#define SPEED_TEST_XXX_SIZE 1000
 
 using TEST_TYPE = HEAP_TYPE; // used for randomization with switch case
 
