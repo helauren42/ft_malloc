@@ -8,6 +8,7 @@
 #include <queue>
 #include <sstream>
 #include <stdexcept>
+#include <sys/types.h>
 #include <utility>
 #include <vector>
 
@@ -33,24 +34,42 @@ typedef struct s_test {
   char c;
   int b;
 } t_test;
+
+template <typename T>
+inline const std::string stringifyVec(vector<T> &ptrs) {
+  if (ptrs.empty())
+    return "[]";
+  stringstream ss;
+  ss << "[";
+  size_t i = 0;
+  size_t last = ptrs.size();
+  for (size_t i = 0; i < ptrs.size(); i++) {
+    ss << "0x" << hex << (ptrs[i]);
+    if (i < ptrs.size() - 1)
+      ss << ", ";
+  }
+  ss << "]";
+  return ss.str();
+}
+
+inline const std::string stringifyMap(map<uintptr_t, size_t> &dict) {
+  if (dict.empty())
+    return "{}";
+  stringstream ss;
+  ss << "{";
+  size_t i = 0;
+  size_t last = dict.size();
+  for (auto it = dict.begin(); it != dict.end(); ++it) {
+    ss << "0x" << std::hex << it->first;
+    if (std::next(it) != dict.end())
+      ss << ", ";
+  }
+  ss << "}";
+  return ss.str();
+}
+
 class Validation {
 private:
-  inline const std::string stringifyVec(vector<uintptr_t> &ptrs) {
-    if (ptrs.empty())
-      return "[]";
-    stringstream ss;
-    ss << "[";
-    size_t i = 0;
-    size_t last = ptrs.size();
-    for (size_t i = 0; i < ptrs.size(); i++) {
-      ss << "0x" << hex << (ptrs[i]);
-      if (i < ptrs.size() - 1)
-        ss << ", ";
-    }
-    ss << "]";
-    return ss.str();
-  }
-
   inline void printDiff(vector<uintptr_t> &expecting, vector<uintptr_t> &outcome) {
     cout << RED << "  Expected: " << stringifyVec(expecting) << endl;
     cout << RED << "  Received: " << stringifyVec(outcome) << endl;
@@ -149,10 +168,14 @@ private:
   vector<uintptr_t> tiny;
   vector<uintptr_t> small;
   vector<uintptr_t> large;
+  bool throwing;
 
   inline bool rmReachable(const uintptr_t &ptr) {
     for (auto it = reachables.rbegin(); it != reachables.rend(); it++) {
+      cout << "rm reachable loop ptr: " << hex << ptr << endl;
+      cout << "rm reachable loop it: " << hex << it->first << endl;
       if (it->first == ptr) {
+        cout << "erasing" << endl;
         reachables.erase(it->first);
         return true;
       }
@@ -180,29 +203,44 @@ private:
   }
 
 public:
-  Tester() {};
+  Tester() {
+    throwing = true;
+  };
+  Tester(bool throwing) {
+    this->throwing = throwing;
+  };
   ~Tester() {
     init_expected_arenas();
     validate_result(tiny, small, large);
   };
 
-  void *wrap_malloc(const size_t &size, const uintptr_t ptr) {
+  void *wrap_malloc(const size_t &size, const void *ptr_void) {
+    uintptr_t ptr = (uintptr_t)ptr_void;
     // process old address
     if (ptr) {
       const auto &leaking = reachables.find(ptr);
       if (leaking != reachables.end())
         addUnreachable(leaking->first, leaking->second);
+      rmReachable(ptr);
     }
     // process new address
     const uintptr_t new_ptr = (const uintptr_t)ft_malloc(size);
+    if (this->throwing && !new_ptr)
+      throw runtime_error("malloc failed to alloc memory");
     addReachable(new_ptr, size);
+    cout << "---------------" << endl;
+    cout << "Post Wrap Malloc reachables: " << stringifyMap(this->reachables) << endl;
+    cout << "Post Wrap Malloc unreachables: " << stringifyMap(this->unreachables) << endl;
     return (void *)new_ptr;
   }
 
   void wrap_free(void *ptr) {
+    cout << "start free" << endl;
     const uintptr_t uintptr = (const uintptr_t)ptr;
-    if (!rmReachable(uintptr))
+    if (!rmReachable(uintptr)) {
       doubleFrees.push(uintptr);
+    }
     ft_free(ptr);
+    cout << "end free" << endl;
   }
 };
