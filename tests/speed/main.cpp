@@ -66,9 +66,9 @@ int main() {
   // ptr = tester.wrap_malloc(80, ptr);
   // tester.wrap_free(ptr);
   // TINY
-  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10); });
-  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
-  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10); });
+  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
   timeTest("tinySpeed 1000", []() { speedTest200(0); });
   // // SMALL
   // timeTest("smallSpeed raw", []() { speedTestFuncRaw(50, 1000); });

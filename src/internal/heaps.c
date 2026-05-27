@@ -58,6 +58,7 @@ inline static void initNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_type,
   t_free_chunk *first_free_chunk = new_heap->first_free_chunk;
   first_free_chunk->prev = NULL;
   first_free_chunk->next = NULL;
+  first_free_chunk->is_free = true;
   // both
   switch (heap_type) {
   case TINY:
@@ -95,16 +96,15 @@ inline static void appendNewHeap(t_heap *new_heap,
   if (!*first_heap)
     *first_heap = new_heap;
   else {
-    t_heap *heap = *first_heap;
-    while (heap->next)
-      heap = heap->next;
-    heap->next = new_heap;
-    new_heap->prev = heap;
+    t_heap *next_heap = *first_heap;
+    next_heap->prev = new_heap;
+    new_heap->next = next_heap;
+    *first_heap = new_heap;
+    debugInfo("appended new heap");
   }
 }
 
-inline t_heap *newHeap(const size_t bytesRequested) {
-  const enum HEAP_TYPE heap_type = getHeapType(bytesRequested);
+inline t_heap *newHeap(const size_t bytesRequested, const enum HEAP_TYPE heap_type) {
   t_heap *new_heap;
   if (heap_type == LARGE) {
     new_heap = mmap(NULL, bytesRequested, MMAP_PROT, MMAP_FLAGS, -1, 0);

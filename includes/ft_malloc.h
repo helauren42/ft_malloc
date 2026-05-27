@@ -18,11 +18,11 @@ extern "C" {
 #define T_CHUNK_SIZE sizeof(t_chunk) // 40 bytes
 #define T_FREE_CHUNK_SIZE sizeof(t_free_chunk)
 #define T_HEAP_SIZE sizeof(t_heap)
-#define TINY_HEAP_SIZE (PAGE_SIZE * 8)
+#define TINY_HEAP_SIZE (PAGE_SIZE * 6)
 #define TINY_MAX_PAYLOAD 128
 // max number of chunks is TINY_HEAP_SIZE / (TINY_MAX_PAYLOAD +
-// T_CHUNK_SIZE) ~ 32768 / (128 + 40) = 195
-#define SMALL_HEAP_SIZE (PAGE_SIZE * 64) // 64
+// T_CHUNK_SIZE) ~ 24576 / (128 + 40) ~ 146
+#define SMALL_HEAP_SIZE (PAGE_SIZE * 32) // ~ 107
 #define SMALL_MAX_PAYLOAD 1024
 #define GUARD_VAL 17496424073816618564
 
@@ -98,7 +98,7 @@ extern t_arenas g_global;
 // MAIN
 void ft_free(void *ptr);
 void *ft_malloc(size_t size);
-void *realloc(void *ptr, size_t size);
+// void *realloc(void *ptr, size_t size);
 void show_alloc_mem();
 void show_alloc_mem_ex();
 
@@ -111,7 +111,7 @@ t_mem_usage printHeaps(t_heap *heap, const enum HEAP_TYPE heap_type,
 t_mem_usage addMem(const t_mem_usage a, const t_mem_usage b);
 
 // HEAPS
-t_heap *newHeap(const size_t bytesRequested);
+t_heap *newHeap(const size_t bytesRequested, const enum HEAP_TYPE heap_type);
 t_heap **getFirstHeap(const enum HEAP_TYPE heap_type);
 void removeHeap(t_heap *heap);
 

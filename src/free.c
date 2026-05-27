@@ -37,10 +37,11 @@ inline static t_free_chunk *mergePrev(t_free_chunk *new_free) {
 
 inline static void prependFreeChunk(t_free_chunk *new_free_chunk,
                                     t_heap *heap) {
-  new_free_chunk->next_free = heap->first_free_chunk;
-  if (!heap->first_free_chunk)
+  if (!heap->first_free_chunk) {
     heap->first_free_chunk = new_free_chunk;
-  else {
+    new_free_chunk->prev_free = NULL;
+    new_free_chunk->next_free = NULL;
+  } else {
     new_free_chunk->next_free = heap->first_free_chunk;
     heap->first_free_chunk = new_free_chunk;
   }
@@ -60,7 +61,6 @@ void ft_free(void *ptr) {
   t_heap *heap = chunk->heap;
   heap->active_chunk_count--;
   if (heap->active_chunk_count == 0 && (heap->next || heap->prev)) {
-    debugInfo("!!!!! REMOVING HEAP");
     removeHeap(heap);
     return;
   }
