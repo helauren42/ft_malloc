@@ -10,6 +10,7 @@ endef
 all:
 	@$(MAKE) valid
 	@$(MAKE) error
+	@$(MAKE) valtests
 	@$(MAKE) speed
 
 valid:
@@ -20,6 +21,11 @@ valid:
 error:
 	$(call header, error)
 	@python ./error/main.py
+	@sleep 1
+
+valtests:
+	$(call header, valtests)
+	@python ./system/valtests.py
 	@sleep 1
 
 speed:

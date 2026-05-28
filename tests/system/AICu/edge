@@ -1,0 +1,11 @@
+only spaces on every lines;
+has some lines with only spaces should still work;
+
+what if line is : 5 5
+is this 55? or 5 or faulty input?
+
+
+cltrl + D into input $>
+
+wtf this creates errors :
+make && clear && valgrind --leak-check=full --show-leak-kinds=all ./AMAZING .
