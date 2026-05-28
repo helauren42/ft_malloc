@@ -22,6 +22,11 @@ error:
 	@python ./error/main.py
 	@sleep 1
 
+valtests:
+	$(call header, valtests)
+	@python ./system/valtests.py
+	@sleep 1
+
 speed:
 	$(call header, error)
 	@c++ -g3 -I ../includes ./src/tester.cpp ./speed/main.cpp -L.. -lft_malloc -Wl,-rpath,.. && ./a.out && $(RM) a.out
