@@ -22,7 +22,7 @@ extern "C" {
 #define TINY_MAX_PAYLOAD 128
 // max number of chunks is TINY_HEAP_SIZE / (TINY_MAX_PAYLOAD +
 // T_CHUNK_SIZE) ~ 24576 / (128 + 40) ~ 146
-#define SMALL_HEAP_SIZE (PAGE_SIZE * 32) // ~ 107
+#define SMALL_HEAP_SIZE (PAGE_SIZE * 26) // 104
 #define SMALL_MAX_PAYLOAD 1024
 #define GUARD_VAL 17496424073816618564
 

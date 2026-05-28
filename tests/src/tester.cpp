@@ -172,10 +172,7 @@ private:
 
   inline bool rmReachable(const uintptr_t &ptr) {
     for (auto it = reachables.rbegin(); it != reachables.rend(); it++) {
-      cout << "rm reachable loop ptr: " << hex << ptr << endl;
-      cout << "rm reachable loop it: " << hex << it->first << endl;
       if (it->first == ptr) {
-        cout << "erasing" << endl;
         reachables.erase(it->first);
         return true;
       }
@@ -228,19 +225,14 @@ public:
     if (this->throwing && !new_ptr)
       throw runtime_error("malloc failed to alloc memory");
     addReachable(new_ptr, size);
-    cout << "---------------" << endl;
-    cout << "Post Wrap Malloc reachables: " << stringifyMap(this->reachables) << endl;
-    cout << "Post Wrap Malloc unreachables: " << stringifyMap(this->unreachables) << endl;
     return (void *)new_ptr;
   }
 
   void wrap_free(void *ptr) {
-    cout << "start free" << endl;
     const uintptr_t uintptr = (const uintptr_t)ptr;
     if (!rmReachable(uintptr)) {
       doubleFrees.push(uintptr);
     }
     ft_free(ptr);
-    cout << "end free" << endl;
   }
 };

@@ -33,8 +33,7 @@ update_source:
 dev: $(NAME)
 	$(MAKE) -C tests dev
 
-# TODO add test later where it actually uses .so
-test: $(NAME) clean
-	$(MAKE) -C tests run
+tests: $(NAME) clean
+	$(MAKE) -C tests
 
 .PHONY: all clean fclean re dev tests
