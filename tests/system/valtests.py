@@ -41,7 +41,7 @@ def test(og: str, custom: str):
 
 def run(cmd: str, path: str):
     test(exec(cmd, False, path), exec(cmd, True, path))
-    print(f"{GREEN}{path} Success")
+    print(f"{GREEN}{path} Success{RESET}")
 
 def main():
     run(cmd='./AMAZING', path="./AICu/")

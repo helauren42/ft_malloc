@@ -10,6 +10,7 @@ endef
 all:
 	@$(MAKE) valid
 	@$(MAKE) error
+	@$(MAKE) valtests
 	@$(MAKE) speed
 
 valid:

@@ -34,10 +34,10 @@ speedTest200(const size_t val) {
 inline static void
 speedTestFuncRaw(const size_t val, const size_t rounds) {
   for (int i = 0; i < rounds; i++) {
-    void *ptr1 = malloc(val);
-    void *ptr = malloc(val);
-    free(ptr);
-    free(ptr1);
+    void *ptr1 = ft_malloc(val);
+    void *ptr = ft_malloc(val);
+    ft_free(ptr);
+    ft_free(ptr1);
     if (!ptr1 || !ptr) {
       throw runtime_error("malloc failed");
     }
