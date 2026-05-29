@@ -18,7 +18,7 @@ inline static size_t getRandomValue(const size_t min, const size_t range) {
 }
 
 inline static void
-speedTest200(const size_t val) {
+speedTest1000(const size_t val) {
   void *addresses[SPEED_TEST_XXX_SIZE];
   for (int i = 0; i < SPEED_TEST_XXX_SIZE; i++) {
     void *ptr = ft_malloc(val);
@@ -57,19 +57,15 @@ static void timeTest(const char *testName, T &&fn) {
   clock_gettime(CLOCK_REALTIME, &end);
   long elapsed_ns = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
   auto ms = std::chrono::milliseconds(elapsed_ns / 1000);
-  cout << ms.count() << "µs" << endl;
+  cout << ms.count() << "ms" << endl;
 }
 
 int main() {
-  // Tester tester = Tester();
-  // void *ptr = tester.wrap_malloc(80, 0);
-  // ptr = tester.wrap_malloc(80, ptr);
-  // tester.wrap_free(ptr);
   // TINY
-  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10); });
-  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
-  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
-  timeTest("tinySpeed 1000", []() { speedTest200(0); });
+  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10); });
+  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10000); });
+  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10000); });
+  timeTest("tinySpeed 1000", []() { speedTest1000(100); });
   // // SMALL
   // timeTest("smallSpeed raw", []() { speedTestFuncRaw(50, 1000); });
   // timeTest("smallSpeed 1000", []() { speedTest1000(80); });

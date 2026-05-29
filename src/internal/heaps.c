@@ -43,6 +43,7 @@ inline static size_t newHeapSize(const size_t payloadSize,
 
 inline static void initNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_type,
                                const size_t bytesRequested) {
+  static const size_t HEADERS_SIZE = T_HEAP_SIZE - T_CHUNK_SIZE;
   // new heap
   new_heap->heap_type = heap_type;
   new_heap->next = NULL;
@@ -56,7 +57,7 @@ inline static void initNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_type,
   first_free_chunk->prev = NULL;
   first_free_chunk->next = NULL;
   first_free_chunk->is_free = true;
-  first_free_chunk->payload_bytes = new_heap->size - T_HEAP_SIZE;
+  first_free_chunk->payload_bytes = new_heap->size - HEADERS_SIZE;
 }
 
 inline static void appendNewHeap(t_heap *new_heap,

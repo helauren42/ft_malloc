@@ -27,10 +27,10 @@ inline static void addNewFreeChunk(const size_t new_payload_size,
                                    const size_t extra_bytes) {
   // new free chunk
   t_free_chunk *new_free_chunk =
-      (void *)(curr_chunk) + T_CHUNK_SIZE + new_payload_size;
+      (void *)(curr_chunk) + T_CHUNK_SIZE;
   new_free_chunk->next = curr_chunk->next;
   new_free_chunk->prev = (void *)curr_chunk;
-  new_free_chunk->payload_bytes = extra_bytes - T_CHUNK_SIZE;
+  new_free_chunk->payload_bytes = new_payload_size;
   new_free_chunk->is_free = true;
   new_free_chunk->next_free = next_free;
   new_free_chunk->prev_free = prev_free;
@@ -39,7 +39,6 @@ inline static void addNewFreeChunk(const size_t new_payload_size,
   // curr chunk
   curr_chunk->payload_bytes -= extra_bytes;
   curr_chunk->next = (void *)new_free_chunk;
-
   // relink  next_free chunk
   if (next_free)
     next_free->prev_free = new_free_chunk;
@@ -104,7 +103,6 @@ inline static t_chunk *findChunkInExistingHeaps(const enum HEAP_TYPE heap_type, 
 }
 
 t_chunk *allocChunk(const size_t bytes_needed) {
-  printLine("allocChunk");
   const enum HEAP_TYPE heap_type = getHeapType(bytes_needed);
   t_heap **first_heap = getFirstHeap(heap_type);
   // if there is no first heap create a new heap and check it worked

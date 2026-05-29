@@ -70,5 +70,4 @@ void ft_free(void *ptr) {
   if ((uintptr_t)new_free != (uintptr_t)chunk || mergeNext(new_free))
     return;
   prependFreeChunk(new_free, heap);
-  printFreeChunks(heap);
 }

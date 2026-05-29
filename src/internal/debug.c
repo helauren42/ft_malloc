@@ -17,7 +17,6 @@ inline void debugError(char *str) {
 }
 
 inline void printFreeChunks(const t_heap *heap) {
-  return;
   t_free_chunk *chunk = heap->first_free_chunk;
   printStr("Free chunks for heap ");
   printAddr(heap, true);
