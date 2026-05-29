@@ -21,23 +21,24 @@ inline static void
 speedTest1000(const size_t val) {
   void *addresses[SPEED_TEST_XXX_SIZE];
   for (int i = 0; i < SPEED_TEST_XXX_SIZE; i++) {
-    void *ptr = ft_malloc(val);
+    void *ptr = malloc(val);
     if (!ptr)
       throw runtime_error("malloc failed on speedTest100");
     addresses[i] = ptr;
   }
   for (int i = 0; i < SPEED_TEST_XXX_SIZE; i++) {
-    ft_free(addresses[i]);
+    free(addresses[i]);
   }
 }
 
 inline static void
 speedTestFuncRaw(const size_t val, const size_t rounds) {
+  malloc(val);
   for (int i = 0; i < rounds; i++) {
-    void *ptr1 = ft_malloc(val);
-    void *ptr = ft_malloc(val);
-    ft_free(ptr);
-    ft_free(ptr1);
+    void *ptr1 = malloc(val);
+    void *ptr = malloc(val);
+    free(ptr);
+    free(ptr1);
     if (!ptr1 || !ptr) {
       throw runtime_error("malloc failed");
     }

@@ -4,8 +4,11 @@
 void base() {
   Tester tester = Tester();
   for (int i = 0; i < 500; i++) {
-    void *ptr = tester.wrap_malloc(2000, NULL);
-    // tester.wrap_free(ptr);
+    void *ptr1 = tester.wrap_malloc(50, NULL);
+    void *ptr2 = tester.wrap_malloc(50, NULL);
+    if (!ptr1 || !ptr2) {
+      throw runtime_error("malloc failed");
+    }
   }
   show_alloc_mem();
 }

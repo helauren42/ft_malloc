@@ -18,42 +18,48 @@ inline static bool mergeNext(t_free_chunk *new_free) {
 
 inline static t_free_chunk *mergePrev(t_free_chunk *new_free) {
   t_free_chunk *prev_free = (t_free_chunk *)new_free->prev;
-  t_free_chunk *next_free = (t_free_chunk *)new_free->next_free;
+  t_free_chunk *next_free = new_free->next_free;
+
   if (!prev_free || !prev_free->is_free)
     return new_free;
+
   prev_free->payload_bytes += new_free->payload_bytes + T_CHUNK_SIZE;
-  // relink before prev to next_free in free list or the heap's first_free_chunk
-  t_free_chunk *before_prev_free = prev_free->prev_free;
-  if (before_prev_free) {
-    before_prev_free->next_free = next_free;
-  } else {
-    new_free->heap->first_free_chunk = prev_free;
-  }
-  // no need to relink before prev in all chunks list because it already points to prev
-  // relink prev_free to next in all chunks list
   prev_free->next = new_free->next;
-  return (t_free_chunk *)prev_free;
+  new_free->next->prev = new_free->prev;
+  next_free->prev_free = prev_free;
+
+  return prev_free;
+}
+
+inline static void unlinkFreeChunk(t_free_chunk *chunk) {
+  t_free_chunk *before = chunk->prev_free;
+  t_free_chunk *after = chunk->next_free;
+  if (before)
+    before->next_free = after;
+  else
+    chunk->heap->first_free_chunk = after;
+  if (after)
+    after->prev_free = before;
 }
 
 inline static void prependFreeChunk(t_free_chunk *new_free_chunk,
                                     t_heap *heap) {
-  if (!heap->first_free_chunk) {
-    heap->first_free_chunk = new_free_chunk;
-    new_free_chunk->prev_free = NULL;
-    new_free_chunk->next_free = NULL;
-  } else {
-    new_free_chunk->next_free = heap->first_free_chunk;
-    heap->first_free_chunk = new_free_chunk;
+  new_free_chunk->prev_free = NULL;
+  new_free_chunk->next_free = heap->first_free_chunk;
+
+  if (heap->first_free_chunk) {
+    heap->first_free_chunk->prev_free = new_free_chunk;
   }
+
+  heap->first_free_chunk = new_free_chunk;
 }
 
 void ft_free(void *ptr) {
   if (!ptr)
     return;
+
   g_global.function_called = FREE;
   t_chunk *chunk = getHeaderAddr(ptr);
-  // printStr("Freeding this addr:"); // TODO logs?
-  // printAddr(chunk, true);
   if (chunk->is_free) {
     errorDoubleFree();
     return;
@@ -64,10 +70,11 @@ void ft_free(void *ptr) {
     removeHeap(heap);
     return;
   }
+
   chunk->is_free = true;
-  t_free_chunk *new_free = mergePrev((t_free_chunk *)chunk);
-  // if merged than there is no need to preprend
-  if ((uintptr_t)new_free != (uintptr_t)chunk || mergeNext(new_free))
-    return;
-  prependFreeChunk(new_free, heap);
+  t_free_chunk *new_free = (t_free_chunk *)chunk;
+  t_free_chunk *merged = mergePrev(new_free);
+  mergeNext(merged);
+  // unlinkFreeChunk(merged);
+  // prependFreeChunk(merged, heap);
 }
