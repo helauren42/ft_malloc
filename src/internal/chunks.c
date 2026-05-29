@@ -104,7 +104,6 @@ inline static t_chunk *findChunkInExistingHeaps(const enum HEAP_TYPE heap_type, 
 }
 
 t_chunk *allocChunk(const size_t bytes_needed) {
-  printLine("allocChunk");
   const enum HEAP_TYPE heap_type = getHeapType(bytes_needed);
   t_heap **first_heap = getFirstHeap(heap_type);
   // if there is no first heap create a new heap and check it worked

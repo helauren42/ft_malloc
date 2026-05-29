@@ -36,13 +36,16 @@ inline static size_t newHeapSize(const size_t payloadSize,
   else if (heap_type == SMALL)
     return SMALL_HEAP_SIZE;
   else {
-    size_t total = payloadSize + T_HEAP_SIZE + T_CHUNK_SIZE;
-    return PAGE_SIZE * (total / PAGE_SIZE + (total % PAGE_SIZE > 0 ? 1 : 0));
+    size_t ret = SMALL_HEAP_SIZE;
+    while (ret < payloadSize + T_HEAP_SIZE + T_CHUNK_SIZE)
+      ret += PAGE_SIZE;
+    return ret;
   }
 }
 
 inline static void initNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_type,
                                const size_t bytesRequested) {
+  static const size_t HEADERS_SIZE = T_HEAP_SIZE + T_CHUNK_SIZE;
   // new heap
   new_heap->heap_type = heap_type;
   new_heap->next = NULL;
@@ -56,7 +59,21 @@ inline static void initNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_type,
   first_free_chunk->prev = NULL;
   first_free_chunk->next = NULL;
   first_free_chunk->is_free = true;
-  first_free_chunk->payload_bytes = new_heap->size - T_HEAP_SIZE;
+  // both
+  switch (heap_type) {
+  case TINY:
+    first_free_chunk->payload_bytes = TINY_HEAP_SIZE - HEADERS_SIZE;
+    break;
+  case SMALL:
+    first_free_chunk->payload_bytes = SMALL_HEAP_SIZE - HEADERS_SIZE;
+    break;
+  case LARGE:
+    first_free_chunk->payload_bytes =
+        newHeapSize(bytesRequested, heap_type) - HEADERS_SIZE; // TOCHECK
+    break;
+  default:
+    debugError("errorHeapMetadataCorruption default case");
+  }
 }
 
 inline static void appendNewHeap(t_heap *new_heap,
@@ -90,7 +107,7 @@ inline static void appendNewHeap(t_heap *new_heap,
 inline t_heap *newHeap(const size_t bytesRequested, const enum HEAP_TYPE heap_type) {
   t_heap *new_heap;
   if (heap_type == LARGE) {
-    new_heap = mmap(NULL, bytesRequested + T_HEAP_SIZE + T_CHUNK_SIZE, MMAP_PROT, MMAP_FLAGS, -1, 0);
+    new_heap = mmap(NULL, bytesRequested, MMAP_PROT, MMAP_FLAGS, -1, 0);
   } else {
     new_heap = newLimitedHeap(heap_type);
   }
