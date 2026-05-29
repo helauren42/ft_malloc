@@ -183,6 +183,7 @@ private:
     unreachables[ptr] = size;
   }
   inline void addReachable(const uintptr_t ptr, const size_t &size) {
+    cout << "addReachable " << ptr - T_CHUNK_SIZE << endl;
     reachables.insert_or_assign((uintptr_t)ptr, size);
   }
 
@@ -212,6 +213,7 @@ public:
   };
 
   void *wrap_malloc(const size_t &size, const void *ptr_void) {
+    cout << "malloc wrap_malloc" << endl;
     uintptr_t ptr = (uintptr_t)ptr_void;
     // process old address
     if (ptr) {
