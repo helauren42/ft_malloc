@@ -34,10 +34,10 @@ speedTest1000(const size_t val) {
 inline static void
 speedTestFuncRaw(const size_t val, const size_t rounds) {
   for (int i = 0; i < rounds; i++) {
-    void *ptr1 = malloc(val);
-    void *ptr = malloc(val);
-    free(ptr);
-    free(ptr1);
+    void *ptr1 = ft_malloc(val);
+    void *ptr = ft_malloc(val);
+    ft_free(ptr);
+    ft_free(ptr1);
     if (!ptr1 || !ptr) {
       throw runtime_error("malloc failed");
     }
@@ -62,9 +62,9 @@ static void timeTest(const char *testName, T &&fn) {
 
 int main() {
   // TINY
-  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10); });
-  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10000); });
-  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10000); });
+  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10); });
+  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10000); });
+  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10000); });
   timeTest("tinySpeed 1000", []() { speedTest1000(100); });
   // // SMALL
   // timeTest("smallSpeed raw", []() { speedTestFuncRaw(50, 1000); });

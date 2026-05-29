@@ -82,21 +82,27 @@ static t_chunk *unfreeChunk(const size_t bytesNeeded, t_free_chunk *curr_chunk,
   return (t_chunk *)curr_chunk;
 }
 
+inline static t_chunk *findChunkInHeap(const enum HEAP_TYPE heap_type, t_heap *heap, const size_t bytes_needed) {
+  t_free_chunk *free_chunk = heap->first_free_chunk;
+  while (free_chunk) {
+    if (free_chunk->payload_bytes >= bytes_needed) {
+      t_chunk *new_chunk = unfreeChunk(bytes_needed, free_chunk, heap, heap_type);
+      if (new_chunk)
+        heap->active_chunk_count++;
+      return new_chunk;
+    }
+    free_chunk = free_chunk->next_free;
+  }
+  return NULL;
+}
+
 inline static t_chunk *findChunkInExistingHeaps(const enum HEAP_TYPE heap_type, t_heap *heap, const size_t bytes_needed) {
   // iterate through heaps
   while (heap) {
     // iterate through heaps
-    t_free_chunk *free_chunk = heap->first_free_chunk;
-    while (free_chunk) {
-      if (free_chunk->payload_bytes >= bytes_needed) {
-        t_chunk *new_chunk = unfreeChunk(bytes_needed, free_chunk, heap, heap_type);
-        if (new_chunk)
-          heap->active_chunk_count++;
-        debugInfo("Returning allocated chunk");
-        return new_chunk;
-      }
-      free_chunk = free_chunk->next_free;
-    }
+    t_chunk *chunk = findChunkInHeap(heap_type, heap, bytes_needed);
+    if (chunk)
+      return chunk;
     heap = heap->next;
   }
   return NULL;
@@ -106,19 +112,12 @@ t_chunk *allocChunk(const size_t bytes_needed) {
   const enum HEAP_TYPE heap_type = getHeapType(bytes_needed);
   t_heap **first_heap = getFirstHeap(heap_type);
   // if there is no first heap create a new heap and check it worked
-  if (!first_heap || !*first_heap) {
-    if (!newHeap(bytes_needed, heap_type))
-      return debugError("Failed to create new heap\n"), NULL;
-    first_heap = getFirstHeap(heap_type);
-    if (!first_heap || !*first_heap)
-      return debugError("get first heap returned null when newHeap succeeded"),
-             NULL;
-  }
   t_chunk *new_chunk = findChunkInExistingHeaps(heap_type, *first_heap, bytes_needed);
   if (!new_chunk) {
-    if (!newHeap(bytes_needed, heap_type))
-      return NULL;
-    new_chunk = findChunkInExistingHeaps(heap_type, *first_heap, bytes_needed);
+    t_heap *new_heap = newHeap(bytes_needed, heap_type);
+    if (!new_heap)
+      return debugError("Failed to create new heap\n"), NULL;
+    new_chunk = findChunkInHeap(heap_type, new_heap, bytes_needed);
     if (!new_chunk)
       return debugError("Failed to allocatate chunk"), NULL;
   }
