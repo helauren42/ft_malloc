@@ -8,6 +8,7 @@ define header
 endef
 
 all:
+	cd .. && make re
 	@$(MAKE) valid
 	@$(MAKE) error
 	@$(MAKE) valtests
