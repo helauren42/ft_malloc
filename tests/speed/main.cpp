@@ -24,6 +24,7 @@ speedTest200(const size_t val) {
     void *ptr = ft_malloc(val);
     if (!ptr)
       throw runtime_error("malloc failed on speedTest100");
+    cout << "iter: " << i << endl;
     addresses[i] = ptr;
   }
   for (int i = 0; i < SPEED_TEST_XXX_SIZE; i++) {
@@ -66,10 +67,14 @@ int main() {
   // ptr = tester.wrap_malloc(80, ptr);
   // tester.wrap_free(ptr);
   // TINY
-  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10); });
+  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10); });
+  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
   timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
-  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
-  timeTest("tinySpeed 1000", []() { speedTest200(0); });
+  timeTest("tinySpeed 1000", []() { speedTest200(10); });
   // // SMALL
   // timeTest("smallSpeed raw", []() { speedTestFuncRaw(50, 1000); });
   // timeTest("smallSpeed 1000", []() { speedTest1000(80); });
