@@ -68,7 +68,7 @@ inline const std::string stringifyMap(map<uintptr_t, size_t> &dict) {
   return ss.str();
 }
 
-class Validation {
+class Validator {
 private:
   inline void printDiff(vector<uintptr_t> &expecting, vector<uintptr_t> &outcome) {
     cout << RED << "  Expected: " << stringifyVec(expecting) << endl;
@@ -160,7 +160,7 @@ public:
   }
 };
 
-class Tester : Validation {
+class Tester : Validator {
 private:
   map<uintptr_t, size_t> reachables;
   map<uintptr_t, size_t> unreachables;

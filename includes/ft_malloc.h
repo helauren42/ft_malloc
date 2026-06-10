@@ -11,6 +11,8 @@ extern "C" {
 #include <sys/mman.h>
 #include <unistd.h>
 
+extern int loops;
+
 #define DEV 0
 #define SECURE 0 // 0-1 if 1 then on free data will be zeroed
 
@@ -132,6 +134,7 @@ void errorDoubleFree();
 void debugError(char *str);
 void debugInfo(char *str);
 void printFreeChunks(const t_heap *heap);
+void printHeapChunks(t_heap *heap);
 
 // LIBFT
 int ft_strlen(const char *str);
@@ -144,6 +147,7 @@ void ft_putsize_t(size_t n, int fd);
 void printLine(const char *str);
 void printStr(const char *str);
 void printAddr(const void *addr, const bool newline);
+void printVal(size_t val, char *varName);
 
 #endif
 

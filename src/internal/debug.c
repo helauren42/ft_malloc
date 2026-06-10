@@ -43,3 +43,16 @@ inline void printFreeChunks(const t_heap *heap) {
     chunk = chunk->next_free;
   }
 }
+
+inline void printHeapChunks(t_heap *heap) {
+  printStr("Print Heap Chunks for heap: ");
+  t_chunk *chunk = heap->first_chunk;
+  while (chunk) {
+    printStr("Chunk addr: ");
+    printAddr(chunk, true);
+    ft_putsize_t(chunk->payload_bytes, 1);
+    printStr("\nIs free: ");
+    printLine(chunk->is_free ? "true" : "false");
+    chunk = chunk->next;
+  }
+}
