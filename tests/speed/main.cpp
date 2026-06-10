@@ -72,9 +72,15 @@ int main() {
   timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
   timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
   timeTest("tinySpeed XXX", []() { speedTestXXX(256); });
+  timeTest("tinySpeed XXX", []() { speedTestXXX(256); });
+  timeTest("tinySpeed XXX", []() { speedTestXXX(256); });
   // timeTest("tinySpeed1000", []() { speedTest200(10); });
   // // SMALL
   timeTest("smallSpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  timeTest("smallSpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  timeTest("smallSpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  timeTest("smallSpeed XXX", []() { speedTestXXX(0); });
+  timeTest("smallSpeed XXX", []() { speedTestXXX(0); });
   timeTest("smallSpeed XXX", []() { speedTestXXX(0); });
   // show_alloc_mem();
   return 0;

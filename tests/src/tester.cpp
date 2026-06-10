@@ -35,8 +35,7 @@ typedef struct s_test {
   int b;
 } t_test;
 
-template <typename T>
-inline const std::string stringifyVec(vector<T> &ptrs) {
+template <typename T> inline const std::string stringifyVec(vector<T> &ptrs) {
   if (ptrs.empty())
     return "[]";
   stringstream ss;
@@ -77,8 +76,7 @@ private:
     set_difference(expecting.begin(), expecting.end(), outcome.begin(), outcome.end(), back_inserter(minus));
     if (!minus.size())
       return;
-    cout << RED << "  -Diff: " << endl
-         << "    ";
+    cout << RED << "  -Diff: " << endl << "    ";
     for (size_t i = 0; i < minus.size(); i++) {
       cout << hex << minus[i];
       if (i < minus.size() - 1)
@@ -89,8 +87,7 @@ private:
     set_difference(outcome.begin(), outcome.end(), expecting.begin(), expecting.end(), back_inserter(plus));
     if (!plus.size())
       return;
-    cout << RED << "  +Diff: " << endl
-         << "    ";
+    cout << RED << "  +Diff: " << endl << "    ";
     for (size_t i = 0; i < plus.size(); i++) {
       cout << hex << plus[i];
       if (i < plus.size() - 1)
@@ -179,12 +176,8 @@ private:
     }
     return false;
   }
-  inline void addUnreachable(const uintptr_t ptr, const size_t &size) {
-    unreachables[ptr] = size;
-  }
-  inline void addReachable(const uintptr_t ptr, const size_t &size) {
-    reachables.insert_or_assign((uintptr_t)ptr, size);
-  }
+  inline void addUnreachable(const uintptr_t ptr, const size_t &size) { unreachables[ptr] = size; }
+  inline void addReachable(const uintptr_t ptr, const size_t &size) { reachables.insert_or_assign((uintptr_t)ptr, size); }
 
   inline void init_expected_arenas() {
     reachables.merge(unreachables);
@@ -200,12 +193,8 @@ private:
   }
 
 public:
-  Tester() {
-    throwing = true;
-  };
-  Tester(bool throwing) {
-    this->throwing = throwing;
-  };
+  Tester() { throwing = true; };
+  Tester(bool throwing) { this->throwing = throwing; };
   ~Tester() {
     init_expected_arenas();
     validate_result(tiny, small, large);

@@ -1,9 +1,13 @@
 #include "../src/tester.cpp"
 #include "ft_malloc.h"
+#include <string.h>
+
+int loops = 0;
 
 void base() {
   Tester tester = Tester();
   char *tiny1 = (char *)tester.wrap_malloc(sizeof(char) * 82, 0);
+  char text[] = "hello world!";
   char *tiny2 = (char *)tester.wrap_malloc(sizeof(char) * 107, 0);
   t_nest *tiny3 = (t_nest *)tester.wrap_malloc(sizeof(t_nest), 0);
   t_test *tiny4 = (t_test *)tester.wrap_malloc(sizeof(t_test), 0);

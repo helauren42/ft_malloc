@@ -11,8 +11,6 @@ extern "C" {
 #include <sys/mman.h>
 #include <unistd.h>
 
-extern int loops;
-
 #define DEV 0
 #define SECURE 0 // 0-1 if 1 then on free data will be zeroed
 
