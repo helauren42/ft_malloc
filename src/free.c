@@ -17,6 +17,9 @@ inline static bool mergeNext(t_free_chunk *new_free) {
   new_free->next_free = next->next_free;
   if (next->next_free)
     next->next_free->prev_free = new_free;
+  if (!next->prev_free) {
+    new_free->heap->first_free_chunk = new_free;
+  }
   return true;
 }
 
@@ -28,7 +31,6 @@ inline static t_free_chunk *mergePrev(t_free_chunk *new_free) {
   prev_free->payload_bytes = prev_free->payload_bytes + new_free->payload_bytes + T_CHUNK_SIZE;
   if (!prev_free->prev_free)
     new_free->heap->first_free_chunk = prev_free;
-  // no need to relink before prev in all chunks list because it already points to prev
   // relink prev_free to next in all chunks list
   prev_free->next = new_free->next;
   return (t_free_chunk *)prev_free;

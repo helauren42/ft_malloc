@@ -35,7 +35,7 @@ speedTest200(const size_t val) {
 
 inline static void
 speedTestFuncRaw(const size_t val, const size_t rounds) {
-  for (loops = 0; loops < 3; loops++) {
+  for (loops = 0; loops < 300; loops++) {
     cout << "iter: " << loops << endl;
     void *ptr1 = ft_malloc(val);
     void *ptr = ft_malloc(val);
