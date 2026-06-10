@@ -63,6 +63,7 @@ inline static void initNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_type,
   switch (heap_type) {
   case TINY:
     first_free_chunk->payload_bytes = TINY_HEAP_SIZE - HEADERS_SIZE;
+    debugVal("", "first_free_chunk->payload_bytes: ", first_free_chunk->payload_bytes);
     break;
   case SMALL:
     first_free_chunk->payload_bytes = SMALL_HEAP_SIZE - HEADERS_SIZE;

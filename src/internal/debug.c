@@ -1,4 +1,5 @@
 #include "ft_malloc.h"
+#include <stddef.h>
 #include <unistd.h>
 
 inline void debugInfo(char *str) {
@@ -14,6 +15,25 @@ inline void debugError(char *str) {
   write(STDERR_FILENO, "MALLOC ERROR: ", 14);
   write(STDERR_FILENO, str, ft_strlen(str));
   write(STDERR_FILENO, "\n", 1);
+}
+
+inline void debugVal(const char *text, const char *charname, const size_t var) {
+  if (!DEV)
+    return;
+  printStr(text);
+  printStr(" - ");
+  printStr(charname);
+  printStr(": ");
+  ft_putsize_t(var, 1);
+  printLine("");
+}
+
+inline void debugAddr(const char *textAddrName, const void *ptr) {
+  if (!DEV)
+    return;
+  printStr(textAddrName);
+  printStr(": ");
+  printAddr(ptr, true);
 }
 
 inline void printFreeChunks(const t_heap *heap) {
@@ -41,5 +61,18 @@ inline void printFreeChunks(const t_heap *heap) {
     printStr("    prev_free:    ");
     printAddr(chunk->prev_free, true);
     chunk = chunk->next_free;
+  }
+}
+
+inline void printHeapChunks(t_heap *heap) {
+  printStr("Print Heap Chunks for heap: ");
+  t_chunk *chunk = heap->first_chunk;
+  while (chunk) {
+    printStr("Chunk addr: ");
+    printAddr(chunk, true);
+    ft_putsize_t(chunk->payload_bytes, 1);
+    printStr("\nIs free: ");
+    printLine(chunk->is_free ? "true" : "false");
+    chunk = chunk->next;
   }
 }

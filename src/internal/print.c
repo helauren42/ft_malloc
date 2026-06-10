@@ -1,4 +1,5 @@
 #include "ft_malloc.h"
+#include <stddef.h>
 
 inline void printLine(const char *str) {
   write(1, str, ft_strlen(str));
@@ -80,4 +81,11 @@ inline void printAddr(const void *addr, const bool newline) {
 
   if (newline)
     write(1, "\n", 1);
+}
+
+inline void printVal(size_t val, char *varName) {
+  printStr(varName);
+  printStr(": ");
+  ft_putsize_t(val, 1);
+  printLine("");
 }

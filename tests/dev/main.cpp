@@ -2,6 +2,8 @@
 #include "ft_malloc.h"
 #include <chrono>
 
+#define SPEED_TEST_XXX_SIZE 1000
+
 // testing allocs of all sizes
 
 void base() {
@@ -42,21 +44,26 @@ void base1() {
   tester.wrap_free(ptr);
 }
 
-void speed1() {
+inline static void
+speedTest200(const size_t val) {
+  void *addresses[SPEED_TEST_XXX_SIZE];
+  for (int i = 0; i < SPEED_TEST_XXX_SIZE; i++) {
+    void *ptr = ft_malloc(val);
+    if (!ptr)
+      throw runtime_error("malloc failed on speedTest100");
+    addresses[i] = ptr;
+  }
+  for (int i = 0; i < SPEED_TEST_XXX_SIZE; i++) {
+    ft_free(addresses[i]);
+  }
+}
+
+template <typename T>
+static void timeTest(const char *testName, T &&fn) {
+  cout << testName << ": ";
   struct timespec start;
   clock_gettime(CLOCK_REALTIME, &start);
-  for (int i = 0; i < 1001; i++) {
-    void *ptr1 = ft_malloc(40);
-    void *ptr = ft_malloc(80);
-    ft_free(ptr1);
-    ft_free(ptr);
-    if (!ptr1 || !ptr) {
-      throw runtime_error("malloc failed");
-    }
-    // void *ptr1 = malloc(val);
-    // void *ptr = malloc(val);
-    // free(ptr);
-  }
+  fn();
   struct timespec end;
   clock_gettime(CLOCK_REALTIME, &end);
   long elapsed_ns = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
@@ -66,5 +73,13 @@ void speed1() {
 
 int main() {
   //  base();
-  speed1();
+  speedTest200(70);
+  timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  timeTest("tinySpeed 1000", []() { speedTest200(10); });
 }

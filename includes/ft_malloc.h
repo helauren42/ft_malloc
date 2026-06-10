@@ -11,6 +11,8 @@ extern "C" {
 #include <sys/mman.h>
 #include <unistd.h>
 
+extern int loops;
+
 #define DEV 0
 #define SECURE 0 // 0-1 if 1 then on free data will be zeroed
 
@@ -34,13 +36,9 @@ extern "C" {
 
 #define PAYLOAD_SIZE(chunk_bytes) chunk_bytes - T_CHUNK_SIZE
 
-enum HEAP_TYPE { TINY,
-                 SMALL,
-                 LARGE };
+enum HEAP_TYPE { TINY, SMALL, LARGE };
 
-enum FUNCTION_CALLED { MALLOC,
-                       REALLOC,
-                       FREE };
+enum FUNCTION_CALLED { MALLOC, REALLOC, FREE };
 
 typedef struct s_chunk t_chunk;
 typedef struct s_free_chunk t_free_chunk;
@@ -106,8 +104,7 @@ void show_alloc_mem_ex();
 void printHeapTitle(const unsigned int count);
 size_t getLargeHeapSize(t_heap *heap);
 size_t getHeapSize(t_heap *heap, const enum HEAP_TYPE heap_type);
-t_mem_usage printHeaps(t_heap *heap, const enum HEAP_TYPE heap_type,
-                       const bool hex);
+t_mem_usage printHeaps(t_heap *heap, const enum HEAP_TYPE heap_type, const bool hex);
 t_mem_usage addMem(const t_mem_usage a, const t_mem_usage b);
 
 // HEAPS
@@ -131,7 +128,10 @@ void errorDoubleFree();
 // DEBUGS
 void debugError(char *str);
 void debugInfo(char *str);
+void debugVal(const char *text, const char *charname, const size_t var);
+void debugAddr(const char *textAddrName, const void *ptr);
 void printFreeChunks(const t_heap *heap);
+void printHeapChunks(t_heap *heap);
 
 // LIBFT
 int ft_strlen(const char *str);
@@ -144,6 +144,7 @@ void ft_putsize_t(size_t n, int fd);
 void printLine(const char *str);
 void printStr(const char *str);
 void printAddr(const void *addr, const bool newline);
+void printVal(size_t val, char *varName);
 
 #endif
 
