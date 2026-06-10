@@ -6,7 +6,7 @@
 #include <ctime>
 #include <stdexcept>
 
-#define SPEED_TEST_XXX_SIZE 2
+#define SPEED_TEST_XXX_SIZE 200
 
 int loops = -1;
 
@@ -19,8 +19,7 @@ inline static size_t getRandomValue(const size_t min, const size_t range) {
   return min + (rand() % range);
 }
 
-inline static void
-speedTest200(const size_t val) {
+inline static void speedTestXXX(const size_t val) {
   void *addresses[SPEED_TEST_XXX_SIZE];
   for (unsigned int i = 0; i < SPEED_TEST_XXX_SIZE; i++) {
     void *ptr = ft_malloc(val);
@@ -33,15 +32,11 @@ speedTest200(const size_t val) {
   }
 }
 
-inline static void
-speedTestFuncRaw(const size_t val, const size_t rounds) {
-  for (loops = 0; loops < 300; loops++) {
-    cout << "iter: " << loops << endl;
+inline static void speedTestFuncRaw(const size_t val, const size_t rounds) {
+  for (loops = 0; loops < rounds; loops++) {
     void *ptr1 = ft_malloc(val);
     void *ptr = ft_malloc(val);
     // cout << "global's first_free_chunk: " << g_global.tiny_first->first_free_chunk << endl;
-    cout << endl
-         << "FREE" << endl;
     ft_free(ptr);
     ft_free(ptr1);
     if (!ptr1 || !ptr) {
@@ -49,16 +44,13 @@ speedTestFuncRaw(const size_t val, const size_t rounds) {
     }
     // printHeapChunks(g_global.tiny_first);
     // cout << "global's first_free_chunk: " << g_global.tiny_first->first_free_chunk << endl;
-    cout << "END" << endl
-         << endl;
     // void *ptr1 = malloc(val);
     // void *ptr = malloc(val);
     // free(ptr);
   }
 }
 
-template <typename T>
-static void timeTest(const char *testName, T &&fn) {
+template <typename T> static void timeTest(const char *testName, T &&fn) {
   cout << testName << ": ";
   struct timespec start;
   clock_gettime(CLOCK_REALTIME, &start);
@@ -71,22 +63,22 @@ static void timeTest(const char *testName, T &&fn) {
 }
 
 int main() {
-  // Tester tester = Tester();
-  // void *ptr = tester.wrap_malloc(80, 0);
-  // ptr = tester.wrap_malloc(80, ptr);
-  // tester.wrap_free(ptr);
+  Tester tester = Tester();
+  void *ptr = tester.wrap_malloc(80, 0);
+  ptr = tester.wrap_malloc(80, ptr);
+  tester.wrap_free(ptr);
   // TINY
-  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10); });
-  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
-  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
-  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
-  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
-  // timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10); });
+  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
   timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
   // timeTest("tinySpeed1000", []() { speedTest200(10); });
   // // SMALL
   // timeTest("smallSpeed raw", []() { speedTestFuncRaw(50, 1000); });
-  // timeTest("smallSpeed 1000", []() { speedTest1000(80); });
+  timeTest("smallSpeed 1000", []() { speedTestXXX(80); });
   // show_alloc_mem();
   return 0;
 }

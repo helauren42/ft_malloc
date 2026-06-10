@@ -35,11 +35,10 @@ inline static void addNewFreeChunk(const size_t new_payload_size,
   new_free_chunk->prev = (void *)unfreeing;
   new_free_chunk->payload_bytes = extra_bytes - T_CHUNK_SIZE;
   if (new_free_chunk->payload_bytes > 24480)
-    printVal(new_free_chunk->payload_bytes, "NOW COUNT");
+    debugVal("", "NOW COUNT", new_free_chunk->payload_bytes);
   if (loops >= 0) {
-    printVal(new_free_chunk->payload_bytes, "new_free_chunk->payload_bytes");
-    printStr("new_free_chunk addr: ");
-    printAddr(new_free_chunk, true);
+    debugVal("", "new_free_chunk->payload_bytes", new_free_chunk->payload_bytes);
+    debugAddr("new_free_chunk addr: ", new_free_chunk);
   }
   new_free_chunk->is_free = true;
   new_free_chunk->next_free = next_free;
@@ -59,8 +58,7 @@ inline static void addNewFreeChunk(const size_t new_payload_size,
   } else {
     prev_free->next_free = new_free_chunk;
   }
-  printStr("first_free_chunk addr: ");
-  printAddr(heap->first_free_chunk, true);
+  debugAddr("first_free_chunk addr: ", heap->first_free_chunk);
 }
 
 // TODO check for heap metadata corruption
@@ -81,9 +79,9 @@ static t_chunk *unfreeChunk(const size_t bytesNeeded, t_free_chunk *unfreeing,
   t_free_chunk *next_free = unfreeing->next_free;
   if (split_chunk) {
     if (loops >= 0) {
-      printVal(unfreeing->payload_bytes, "unfreeing->payload_bytes");
-      printVal(new_payload_size, "new_payload_size");
-      printVal(extra_bytes, "extra_bytes");
+      debugVal("", "unfreeing->payload_bytes", unfreeing->payload_bytes);
+      debugVal("", "new_payload_size", new_payload_size);
+      debugVal("", "extra_bytes", extra_bytes);
     }
     addNewFreeChunk(new_payload_size, unfreeing, heap, prev_free, next_free,
                     extra_bytes);
@@ -128,8 +126,8 @@ t_chunk *allocChunk(const size_t bytes_needed) {
   const enum HEAP_TYPE heap_type = getHeapType(bytes_needed);
   t_heap **first_heap = getFirstHeap(heap_type);
   if (loops >= 0 && first_heap && *first_heap) {
-    printVal((*first_heap)->first_free_chunk->payload_bytes, "(*first_heap)->first_free_chunk->payload_bytes");
-    printAddr((*first_heap)->first_free_chunk, true);
+    debugVal("", "(*first_heap)->first_free_chunk->payload_bytes", (*first_heap)->first_free_chunk->payload_bytes);
+    debugAddr("(*first_heap)->first_free_chunk", (*first_heap)->first_free_chunk);
   }
   // if there is no first heap create a new heap and check it worked
   if (!first_heap || !*first_heap) {
