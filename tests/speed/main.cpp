@@ -6,7 +6,7 @@
 #include <ctime>
 #include <stdexcept>
 
-#define SPEED_TEST_XXX_SIZE 200
+#define SPEED_TEST_XXX_SIZE 1000
 
 int loops = -1;
 
@@ -19,10 +19,10 @@ inline static size_t getRandomValue(const size_t min, const size_t range) {
   return min + (rand() % range);
 }
 
-inline static void speedTestXXX(const size_t val) {
+inline static void speedTestXXX(const size_t payloadSize) {
   void *addresses[SPEED_TEST_XXX_SIZE];
   for (unsigned int i = 0; i < SPEED_TEST_XXX_SIZE; i++) {
-    void *ptr = ft_malloc(val);
+    void *ptr = ft_malloc(payloadSize);
     if (!ptr)
       throw runtime_error("malloc failed on speedTest100");
     addresses[i] = ptr;
@@ -68,17 +68,20 @@ int main() {
   ptr = tester.wrap_malloc(80, ptr);
   tester.wrap_free(ptr);
   // TINY
-  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 10); });
   timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
   timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
   timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
-  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
-  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
-  timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  timeTest("tinySpeed XXX", []() { speedTestXXX(256); });
+  timeTest("tinySpeed XXX", []() { speedTestXXX(256); });
+  timeTest("tinySpeed XXX", []() { speedTestXXX(256); });
   // timeTest("tinySpeed1000", []() { speedTest200(10); });
   // // SMALL
-  // timeTest("smallSpeed raw", []() { speedTestFuncRaw(50, 1000); });
-  timeTest("smallSpeed 1000", []() { speedTestXXX(80); });
+  timeTest("smallSpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  timeTest("smallSpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  timeTest("smallSpeed raw", []() { speedTestFuncRaw(50, 1000); });
+  timeTest("smallSpeed XXX", []() { speedTestXXX(0); });
+  timeTest("smallSpeed XXX", []() { speedTestXXX(0); });
+  timeTest("smallSpeed XXX", []() { speedTestXXX(0); });
   // show_alloc_mem();
   return 0;
 }

@@ -75,6 +75,5 @@ void ft_free(void *ptr) {
   // the prev and next free chunk pointers are in the payload and will be overwritten so we can't use those to reinsert the chunk
   prependFreeChunk(new_free, heap);
   printFreeChunks(heap);
-  printStr("end first_free_chunk addr: ");
-  printAddr(heap->first_free_chunk, true);
+  debugAddr("endfirst_free_chunk addr", heap->first_free_chunk);
 }

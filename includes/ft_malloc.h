@@ -11,8 +11,6 @@ extern "C" {
 #include <sys/mman.h>
 #include <unistd.h>
 
-extern int loops;
-
 #define DEV 0
 #define SECURE 0 // 0-1 if 1 then on free data will be zeroed
 
@@ -26,7 +24,6 @@ extern int loops;
 // T_CHUNK_SIZE) ~ 24576 / (128 + 40) ~ 146
 #define SMALL_HEAP_SIZE (PAGE_SIZE * 26) // 104
 #define SMALL_MAX_PAYLOAD 1024
-#define GUARD_VAL 17496424073816618564
 
 #define SMALL_MIN_PAYLOAD TINY_MAX_PAYLOAD + 1
 #define LARGE_MIN_PAYLOAD SMALL_MAX_PAYLOAD + 1

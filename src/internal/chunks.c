@@ -3,15 +3,14 @@
 #include <stdio.h>
 #include <unistd.h>
 
+// int loops;
+//
 inline static size_t NewFreeChunkMinSize(const enum HEAP_TYPE heap_type) {
-  static const size_t sizes[LARGE + 1] = {[TINY] = T_FREE_CHUNK_SIZE,
-                                          [SMALL] = SMALL_MIN_PAYLOAD,
-                                          [LARGE] = LARGE_MIN_PAYLOAD};
+  static const size_t sizes[LARGE + 1] = {[TINY] = T_FREE_CHUNK_SIZE, [SMALL] = SMALL_MIN_PAYLOAD, [LARGE] = LARGE_MIN_PAYLOAD};
   return sizes[heap_type];
 }
 
-static inline void setFirstFreeChunk(t_heap *heap,
-                                     t_free_chunk *new_free_chunk) {
+static inline void setFirstFreeChunk(t_heap *heap, t_free_chunk *new_free_chunk) {
   heap->first_free_chunk = new_free_chunk;
   // printStr("1:");
   // printAddr(new_free_chunk, true);
@@ -19,27 +18,20 @@ static inline void setFirstFreeChunk(t_heap *heap,
   // printAddr(heap->first_free_chunk, true);
 }
 
-static inline void setFirstChunk(t_heap *g_global, t_chunk *curr_chunk) {
-  g_global->first_chunk = (t_chunk *)curr_chunk;
-}
+static inline void setFirstChunk(t_heap *g_global, t_chunk *curr_chunk) { g_global->first_chunk = (t_chunk *)curr_chunk; }
 
-inline static void addNewFreeChunk(const size_t new_payload_size,
-                                   t_free_chunk *unfreeing, t_heap *heap,
-                                   t_free_chunk *prev_free,
-                                   t_free_chunk *next_free,
-                                   const size_t extra_bytes) {
+inline static void addNewFreeChunk(const size_t new_payload_size, t_free_chunk *unfreeing, t_heap *heap, t_free_chunk *prev_free, t_free_chunk *next_free, const size_t extra_bytes) {
   // new free chunk
-  t_free_chunk *new_free_chunk =
-      (void *)(unfreeing) + T_CHUNK_SIZE + new_payload_size;
+  t_free_chunk *new_free_chunk = (void *)(unfreeing) + T_CHUNK_SIZE + new_payload_size;
   new_free_chunk->next = unfreeing->next;
   new_free_chunk->prev = (void *)unfreeing;
   new_free_chunk->payload_bytes = extra_bytes - T_CHUNK_SIZE;
   if (new_free_chunk->payload_bytes > 24480)
     debugVal("", "NOW COUNT", new_free_chunk->payload_bytes);
-  if (loops >= 0) {
-    debugVal("", "new_free_chunk->payload_bytes", new_free_chunk->payload_bytes);
-    debugAddr("new_free_chunk addr: ", new_free_chunk);
-  }
+  // if (loops >= 0) {
+  //   debugVal("", "new_free_chunk->payload_bytes", new_free_chunk->payload_bytes);
+  //   debugAddr("new_free_chunk addr: ", new_free_chunk);
+  // }
   new_free_chunk->is_free = true;
   new_free_chunk->next_free = next_free;
   new_free_chunk->prev_free = prev_free;
@@ -62,8 +54,7 @@ inline static void addNewFreeChunk(const size_t new_payload_size,
 }
 
 // TODO check for heap metadata corruption
-static t_chunk *unfreeChunk(const size_t bytesNeeded, t_free_chunk *unfreeing,
-                            t_heap *heap, const enum HEAP_TYPE heap_type) {
+static t_chunk *unfreeChunk(const size_t bytesNeeded, t_free_chunk *unfreeing, t_heap *heap, const enum HEAP_TYPE heap_type) {
   size_t new_payload_size = bytesNeeded < 16 ? 16 + bytesNeeded : bytesNeeded;
   // printStr("unfreeing->payload_bytes: ");
   // ft_putsize_t(unfreeing->payload_bytes, 1);
@@ -78,13 +69,12 @@ static t_chunk *unfreeChunk(const size_t bytesNeeded, t_free_chunk *unfreeing,
   t_free_chunk *prev_free = unfreeing->prev_free;
   t_free_chunk *next_free = unfreeing->next_free;
   if (split_chunk) {
-    if (loops >= 0) {
-      debugVal("", "unfreeing->payload_bytes", unfreeing->payload_bytes);
-      debugVal("", "new_payload_size", new_payload_size);
-      debugVal("", "extra_bytes", extra_bytes);
-    }
-    addNewFreeChunk(new_payload_size, unfreeing, heap, prev_free, next_free,
-                    extra_bytes);
+    // if (loops >= 0) {
+    //   debugVal("", "unfreeing->payload_bytes", unfreeing->payload_bytes);
+    //   debugVal("", "new_payload_size", new_payload_size);
+    //   debugVal("", "extra_bytes", extra_bytes);
+    // }
+    addNewFreeChunk(new_payload_size, unfreeing, heap, prev_free, next_free, extra_bytes);
   } else {
     if (!prev_free) {
       setFirstFreeChunk(heap, next_free);
@@ -125,10 +115,11 @@ inline static t_chunk *findChunkInExistingHeaps(const enum HEAP_TYPE heap_type, 
 t_chunk *allocChunk(const size_t bytes_needed) {
   const enum HEAP_TYPE heap_type = getHeapType(bytes_needed);
   t_heap **first_heap = getFirstHeap(heap_type);
-  if (loops >= 0 && first_heap && *first_heap) {
-    debugVal("", "(*first_heap)->first_free_chunk->payload_bytes", (*first_heap)->first_free_chunk->payload_bytes);
-    debugAddr("(*first_heap)->first_free_chunk", (*first_heap)->first_free_chunk);
-  }
+  // if (loops >= 0 && first_heap && *first_heap) {
+  //   debugAddr("(*first_heap)->first_free_chunk", (*first_heap)->first_free_chunk);
+  //   if ((*first_heap)->first_free_chunk)
+  //     debugVal("", "(*first_heap)->first_free_chunk->payload_bytes", (*first_heap)->first_free_chunk->payload_bytes);
+  // }
   // if there is no first heap create a new heap and check it worked
   if (!first_heap || !*first_heap) {
     if (!newHeap(bytes_needed, heap_type))
@@ -137,8 +128,7 @@ t_chunk *allocChunk(const size_t bytes_needed) {
     // if (loops >= 4)
     //   printVal((*first_heap)->first_free_chunk->payload_bytes, "(*first_heap)->first_free_chunk->payload_bytes");
     if (!first_heap || !*first_heap)
-      return debugError("get first heap returned null when newHeap succeeded"),
-             NULL;
+      return debugError("get first heap returned null when newHeap succeeded"), NULL;
   }
   t_chunk *new_chunk = findChunkInExistingHeaps(heap_type, *first_heap, bytes_needed);
   if (!new_chunk) {
