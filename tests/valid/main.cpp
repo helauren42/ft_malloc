@@ -1,13 +1,37 @@
 #include "../src/tester.cpp"
 #include "ft_malloc.h"
 #include <string.h>
+#include <unistd.h>
+
+#define WRITING_TEST_SIZE 20
 
 int loops = 0;
+
+void initString(char *dest, const char *val) {
+  int i = 0;
+  while (val[i]) {
+    dest[i] = val[i];
+    i++;
+  }
+}
+
+void writing() {
+  write(1, "here1\n", 7);
+  const int alloc_size = 30;
+  const char text[] = "hello world\n";
+  Tester tester = Tester();
+  char *mem[WRITING_TEST_SIZE];
+  for (int i = 0; i < WRITING_TEST_SIZE; i++) {
+    mem[i] = (char *)tester.wrap_malloc(alloc_size, 0);
+    initString(mem[i], text);
+    write(1, mem[i], 12);
+  }
+  show_alloc_mem();
+}
 
 void base() {
   Tester tester = Tester();
   char *tiny1 = (char *)tester.wrap_malloc(sizeof(char) * 82, 0);
-  char text[] = "hello world!";
   char *tiny2 = (char *)tester.wrap_malloc(sizeof(char) * 107, 0);
   t_nest *tiny3 = (t_nest *)tester.wrap_malloc(sizeof(t_nest), 0);
   t_test *tiny4 = (t_test *)tester.wrap_malloc(sizeof(t_test), 0);
@@ -38,5 +62,6 @@ void base() {
 
 int main() {
   base();
+  writing();
   return 0;
 }

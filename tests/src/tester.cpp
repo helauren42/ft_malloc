@@ -8,6 +8,7 @@
 #include <queue>
 #include <sstream>
 #include <stdexcept>
+#include <sys/mman.h>
 #include <sys/types.h>
 #include <utility>
 #include <vector>
@@ -179,7 +180,7 @@ private:
   inline void addUnreachable(const uintptr_t ptr, const size_t &size) { unreachables[ptr] = size; }
   inline void addReachable(const uintptr_t ptr, const size_t &size) { reachables.insert_or_assign((uintptr_t)ptr, size); }
 
-  inline void init_expected_arenas() {
+  inline void initExpectedArenas() {
     reachables.merge(unreachables);
     map<uintptr_t, size_t> allLeaks = reachables;
     for (const auto &[ptr, size] : allLeaks) {
@@ -191,13 +192,29 @@ private:
         large.push_back(ptr - T_CHUNK_SIZE);
     }
   }
+  inline void clearHeap(t_heap *heap) {
+    while (heap) {
+      t_heap *curr = heap;
+      heap = heap->next;
+      munmap(curr, curr->size);
+    }
+  }
+  inline void clearHeaps() {
+    clearHeap(g_global.tiny_first);
+    g_global.tiny_first = NULL;
+    clearHeap(g_global.small_first);
+    g_global.small_first = NULL;
+    clearHeap(g_global.large_first);
+    g_global.large_first = NULL;
+  }
 
 public:
   Tester() { throwing = true; };
   Tester(bool throwing) { this->throwing = throwing; };
   ~Tester() {
-    init_expected_arenas();
+    initExpectedArenas();
     validate_result(tiny, small, large);
+    clearHeaps();
   };
 
   void *wrap_malloc(const size_t &size, const void *ptr_void) {
