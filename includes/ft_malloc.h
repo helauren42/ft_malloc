@@ -93,7 +93,7 @@ extern t_arenas g_global;
 // MAIN
 void ft_free(void *ptr);
 void *ft_malloc(size_t size);
-// void *realloc(void *ptr, size_t size);
+void *ft_realloc(void *ptr, size_t size);
 void show_alloc_mem();
 void show_alloc_mem_ex();
 
@@ -110,7 +110,9 @@ t_heap **getFirstHeap(const enum HEAP_TYPE heap_type);
 void removeHeap(t_heap *heap);
 
 // CHUNKS
+size_t NewFreeChunkMinSize(const enum HEAP_TYPE heap_type);
 t_chunk *allocChunk(const size_t bytesNeeded);
+void prependFreeChunk(t_free_chunk *new_free_chunk, t_heap *heap);
 
 // UTILS
 enum HEAP_TYPE getHeapType(const size_t bytesNeeded);
@@ -121,6 +123,12 @@ t_chunk *getHeaderAddr(void *payload);
 // ERRORS
 void errorHeapMetadataCorruption();
 void errorDoubleFree();
+
+// PRINT
+void printLine(const char *str);
+void printStr(const char *str);
+void printAddr(const void *addr, const bool newline);
+void printVal(size_t val, char *varName);
 
 // DEBUGS
 void debugError(char *str);
@@ -136,12 +144,7 @@ char *ft_strcpy(char *dest, char *src);
 void ft_bzero(void *dst, const size_t n);
 void ft_putnbr_fd(long n, int fd);
 void ft_putsize_t(size_t n, int fd);
-
-// PRINT
-void printLine(const char *str);
-void printStr(const char *str);
-void printAddr(const void *addr, const bool newline);
-void printVal(size_t val, char *varName);
+void *ft_memcpy(void *dst, const void *src, size_t n);
 
 #endif
 

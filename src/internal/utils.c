@@ -24,10 +24,11 @@ inline t_heap *getHeapStart(const enum HEAP_TYPE heap_type) {
 }
 
 inline void *getPayloadAddr(t_chunk *chunk) {
+  //
   return (void *)chunk + T_CHUNK_SIZE;
 }
 
 inline t_chunk *getHeaderAddr(void *payloadAddr) {
-  // TODO check metadata
+  //
   return (t_chunk *)((uintptr_t)payloadAddr - T_CHUNK_SIZE);
 }

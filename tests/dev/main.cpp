@@ -44,8 +44,7 @@ void base1() {
   tester.wrap_free(ptr);
 }
 
-inline static void
-speedTest200(const size_t val) {
+inline static void speedTest200(const size_t val) {
   void *addresses[SPEED_TEST_XXX_SIZE];
   for (int i = 0; i < SPEED_TEST_XXX_SIZE; i++) {
     void *ptr = ft_malloc(val);
@@ -58,8 +57,7 @@ speedTest200(const size_t val) {
   }
 }
 
-template <typename T>
-static void timeTest(const char *testName, T &&fn) {
+template <typename T> static void timeTest(const char *testName, T &&fn) {
   cout << testName << ": ";
   struct timespec start;
   clock_gettime(CLOCK_REALTIME, &start);
@@ -73,13 +71,13 @@ static void timeTest(const char *testName, T &&fn) {
 
 int main() {
   //  base();
-  speedTest200(70);
-  timeTest("tinySpeed 1000", []() { speedTest200(10); });
-  timeTest("tinySpeed 1000", []() { speedTest200(10); });
-  timeTest("tinySpeed 1000", []() { speedTest200(10); });
-  timeTest("tinySpeed 1000", []() { speedTest200(10); });
-  timeTest("tinySpeed 1000", []() { speedTest200(10); });
-  timeTest("tinySpeed 1000", []() { speedTest200(10); });
-  timeTest("tinySpeed 1000", []() { speedTest200(10); });
-  timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  // speedTest200(70);
+  // timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  // timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  // timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  // timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  // timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  // timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  // timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  // timeTest("tinySpeed 1000", []() { speedTest200(10); });
 }

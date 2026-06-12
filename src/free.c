@@ -33,7 +33,7 @@ inline static t_free_chunk *mergePrev(t_free_chunk *new_free) {
   return (t_free_chunk *)prev_free;
 }
 
-inline static void prependFreeChunk(t_free_chunk *new_free_chunk, t_heap *heap) {
+inline void prependFreeChunk(t_free_chunk *new_free_chunk, t_heap *heap) {
   if (!heap->first_free_chunk) {
     heap->first_free_chunk = new_free_chunk;
     new_free_chunk->prev_free = NULL;

@@ -1,6 +1,5 @@
 #include "../src/tester.cpp"
 #include "ft_malloc.h"
-#include <string.h>
 #include <unistd.h>
 
 #define WRITING_TEST_SIZE 20

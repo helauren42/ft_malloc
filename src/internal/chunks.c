@@ -4,8 +4,8 @@
 #include <unistd.h>
 
 // int loops;
-//
-inline static size_t NewFreeChunkMinSize(const enum HEAP_TYPE heap_type) {
+
+inline size_t NewFreeChunkMinSize(const enum HEAP_TYPE heap_type) {
   static const size_t sizes[LARGE + 1] = {[TINY] = T_FREE_CHUNK_SIZE, [SMALL] = SMALL_MIN_PAYLOAD, [LARGE] = LARGE_MIN_PAYLOAD};
   return sizes[heap_type];
 }
