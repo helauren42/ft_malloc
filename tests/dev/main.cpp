@@ -1,6 +1,10 @@
 #include "../src/tester.cpp"
 #include "ft_malloc.h"
 #include <chrono>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <unistd.h>
 
 #define SPEED_TEST_XXX_SIZE 1000
 
@@ -69,7 +73,26 @@ template <typename T> static void timeTest(const char *testName, T &&fn) {
   cout << ms.count() << "µs" << endl;
 }
 
+void testRealloc() {
+  Tester tester = Tester();
+  char *ptr1 = (char *)tester.wrap_malloc(10, NULL);
+  char *ptr2 = (char *)tester.wrap_malloc(10, NULL);
+  // char *ptr3 = (char *)tester.wrap_malloc(10, NULL);
+  // char *ptr4 = (char *)tester.wrap_malloc(10, NULL);
+  cout << "1 ADDR: " << hex << (uintptr_t)ptr1 - T_CHUNK_SIZE << endl;
+  cout << "2 ADDR: " << hex << (uintptr_t)ptr2 - T_CHUNK_SIZE << endl;
+  // cout << "3 ADDR: " << hex << (uintptr_t)ptr3 - T_CHUNK_SIZE << endl;
+  // cout << "4 ADDR: " << hex << (uintptr_t)ptr4 - T_CHUNK_SIZE << endl;
+  for (int i = 0; i < 10; i++)
+    ptr2[i] = 'a';
+  cout << "PRE: " << ptr2 << endl;
+  ptr2 = (char *)tester.wrap_realloc(21, ptr2);
+  cout << "POST: " << ptr2 << endl;
+  cout << "NEW ADDR: " << hex << (uintptr_t)ptr2 - T_CHUNK_SIZE << endl;
+}
+
 int main() {
+  testRealloc();
   //  base();
   // speedTest200(70);
   // timeTest("tinySpeed 1000", []() { speedTest200(10); });
