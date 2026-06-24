@@ -1,5 +1,7 @@
 #include "../src/tester.cpp"
 #include "ft_malloc.h"
+#include <cstdlib>
+#include <string.h>
 #include <unistd.h>
 
 #define WRITING_TEST_SIZE 20
@@ -59,8 +61,44 @@ void base() {
   show_alloc_mem();
 }
 
+void testRealloc() {
+  Tester tester = Tester();
+  char *ptr1 = (char *)tester.wrap_malloc(10, NULL);
+  char *ptr2 = (char *)tester.wrap_malloc(10, NULL);
+  char *ptr3 = (char *)tester.wrap_malloc(10, NULL);
+  char *ptr4 = (char *)tester.wrap_malloc(10, NULL);
+  for (int i = 0; i < 10; i++) {
+    ptr1[i] = 'a';
+    ptr2[i] = 'a';
+    ptr3[i] = 'a';
+    ptr4[i] = 'a';
+  }
+  ptr1 = (char *)tester.wrap_realloc(21, ptr1);
+  ptr2 = (char *)tester.wrap_realloc(21, ptr2);
+  ptr3 = (char *)tester.wrap_realloc(21, ptr3);
+  ptr4 = (char *)tester.wrap_realloc(21, ptr4);
+  const char expected[] = "aaaaaaaaaa";
+  if (!strcmp(ptr1, expected)) {
+    cout << RED << "Realloc error" << endl;
+    exit(1);
+  }
+  if (!strcmp(ptr2, expected)) {
+    cout << RED << "Realloc error" << endl;
+    exit(1);
+  }
+  if (!strcmp(ptr3, expected)) {
+    cout << RED << "Realloc error" << endl;
+    exit(1);
+  }
+  if (!strcmp(ptr4, expected)) {
+    cout << RED << "Realloc error" << endl;
+    exit(1);
+  }
+}
+
 int main() {
   base();
   writing();
+  testRealloc();
   return 0;
 }
