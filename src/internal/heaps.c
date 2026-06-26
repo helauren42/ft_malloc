@@ -29,8 +29,7 @@ inline static t_heap *newLimitedHeap(const enum HEAP_TYPE heap_type) {
   return new_heap;
 }
 
-inline static size_t newHeapSize(const size_t payloadSize,
-                                 const enum HEAP_TYPE heap_type) {
+inline static size_t newHeapSize(const size_t payloadSize, const enum HEAP_TYPE heap_type) {
   if (heap_type == TINY)
     return TINY_HEAP_SIZE;
   else if (heap_type == SMALL)
@@ -43,8 +42,7 @@ inline static size_t newHeapSize(const size_t payloadSize,
   }
 }
 
-inline static void initNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_type,
-                               const size_t bytesRequested) {
+inline static void initNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_type, const size_t bytesRequested) {
   static const size_t HEADERS_SIZE = T_HEAP_SIZE + T_CHUNK_SIZE;
   // new heap
   new_heap->heap_type = heap_type;
@@ -69,16 +67,14 @@ inline static void initNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_type,
     first_free_chunk->payload_bytes = SMALL_HEAP_SIZE - HEADERS_SIZE;
     break;
   case LARGE:
-    first_free_chunk->payload_bytes =
-        newHeapSize(bytesRequested, heap_type) - HEADERS_SIZE; // TOCHECK
+    first_free_chunk->payload_bytes = newHeapSize(bytesRequested, heap_type) - HEADERS_SIZE; // TOCHECK
     break;
   default:
     debugError("errorHeapMetadataCorruption default case");
   }
 }
 
-inline static void appendNewHeap(t_heap *new_heap,
-                                 const enum HEAP_TYPE heap_type) {
+inline static void appendNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_type) {
   t_heap **first_heap;
   switch (heap_type) {
   case TINY:

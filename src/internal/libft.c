@@ -49,5 +49,5 @@ void *ft_memcpy(void *dst, const void *src, size_t n) {
     udst[i] = usrc[i];
     i++;
   }
-  return (udst);
+  return udst;
 }

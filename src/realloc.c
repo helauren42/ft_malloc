@@ -31,13 +31,14 @@ static inline bool try_expand(t_chunk *chunk, t_free_chunk *next, const size_t d
   chunk->next = (t_chunk *)new_next;
   chunk->payload_bytes += diff;
   new_next->payload_bytes = new_next_payload_size;
+  debugInfo("try expand on realloc");
   return true;
 }
 
 static inline void retract(t_chunk *chunk, t_free_chunk *next, const size_t diff) {
   static const size_t min_payload_size = T_FREE_CHUNK_SIZE - T_CHUNK_SIZE;
   static uint8_t buffer[T_FREE_CHUNK_SIZE];
-  if (next) {
+  if (next && next->is_free) {
     size_t new_chunk_payload_size = chunk->payload_bytes - diff;
     if (new_chunk_payload_size <= min_payload_size)
       new_chunk_payload_size = min_payload_size;
@@ -66,27 +67,40 @@ static inline void retract(t_chunk *chunk, t_free_chunk *next, const size_t diff
 void *ft_realloc(void *ptr, size_t size) {
   t_chunk *chunk = getHeaderAddr(ptr);
   const size_t curr_size = chunk->payload_bytes;
+  bool toFree = false;
   if (!ptr)
     return ft_malloc(size);
   if (size == curr_size)
     return ptr;
-
+  void *ret;
   if (size == 0) {
-    return ft_free(ptr), NULL;
+    toFree = true;
+    ret = NULL;
   } else if (size > curr_size) {
     if (try_expand(chunk, (t_free_chunk *)chunk->next, size - curr_size))
-      return ptr;
+      ret = ptr;
     else {
+      debugInfo("new malloc call on realloc");
       void *new_ptr = ft_malloc(size);
       if (!new_ptr)
-        return NULL;
+        ret = NULL;
       t_chunk *new_chunk = getHeaderAddr(new_ptr);
       const size_t size_copied = new_chunk->payload_bytes < chunk->payload_bytes ? new_chunk->payload_bytes : chunk->payload_bytes;
       ft_memcpy(new_ptr, ptr, size_copied);
-      ft_free(ptr);
-      return new_ptr;
+      toFree = true;
+      ret = new_ptr;
     }
-  } else
-    return retract(chunk, (t_free_chunk *)chunk->next, curr_size - size), ptr;
-  return NULL;
+  } else {
+    retract(chunk, (t_free_chunk *)chunk->next, curr_size - size);
+    ret = ptr;
+  }
+  // copy data from previous address to new address
+  if (ret != NULL && ret != ptr) {
+    const size_t new_size = getHeaderAddr(ret)->payload_bytes;
+    const size_t n = new_size < curr_size ? new_size : curr_size;
+    ft_memcpy(ret, ptr, n);
+  }
+  if (toFree)
+    ft_free(ptr);
+  return ret;
 }
