@@ -1,3 +1,4 @@
+import os
 import subprocess, sys
 from pathlib import Path
 
@@ -5,12 +6,10 @@ RED = "\033[31m";
 GREEN = "\033[32m";
 RESET = "\033[0m";
 
-SYSTEM_TESTS_DIR = Path(__file__).resolve().parent
-
 def exec(cmd: str, custom: bool, path: str):
-    lib_path = Path.home() / "Projects/ft_malloc/libft_malloc.so"
+    lib_path = Path.joinpath(Path.cwd(), "../libft_malloc.so").resolve()
     preload = f"LD_PRELOAD={lib_path}" if custom else ""
-    stderr = subprocess.run([f"(sleep 3 && pkill -f valgrind) & make && {preload} valgrind --leak-check=full  --show-leak-kinds=all ./{cmd}"], shell=True, capture_output=True, cwd=Path.joinpath(SYSTEM_TESTS_DIR, path)).stderr
+    stderr = subprocess.run([f"(sleep 5 && pkill -f valgrind) & make && {preload} valgrind --leak-check=full  --show-leak-kinds=all ./{cmd}"], shell=True, capture_output=True, cwd=Path.joinpath(Path.cwd(), "./system/", path).resolve()).stderr
     return stderr.decode()
 
 def test(og: str, custom: str):

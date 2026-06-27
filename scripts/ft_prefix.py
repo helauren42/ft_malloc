@@ -16,15 +16,23 @@ def hasFunctionCall(line: str, index: int)-> tuple[int, Function_Call_Type] | No
             function_call = "ft_" + function_call
         index = line.find(function_call, index)
         if index >= 0:
+            print("found function_call: ", line)
             return (index, function_call) # pyright: ignore
     return None
 
+def isPrepended(line: str, index: int)-> bool:
+    if index >= 3 and line[index-3:index] == "ft_" or line[index:index+3] == "ft_":
+        return True
+    return False
+
 def prepend_ft(index: int, line: str):
-    if index >= 0 and line[index: index+3] != "ft_":
+    pass
+    if index >= 0 and isPrepended(line, index) == False:
         return line[0:index] + "ft_" + line[index:]
     return line
 
 def remove_ft(index: int, line: str):
+    pass
     if index >= 0 and line[index: index+3] == "ft_":
         return line[0:index] + line[index+3:]
     return line
