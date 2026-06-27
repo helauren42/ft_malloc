@@ -65,12 +65,12 @@ static inline void retract(t_chunk *chunk, t_free_chunk *next, const size_t diff
   }
 }
 
-void *ft_realloc(void *ptr, size_t size) {
+void *realloc(void *ptr, size_t size) {
   t_chunk *chunk = getHeaderAddr(ptr);
   const size_t curr_size = chunk->payload_bytes;
   bool toFree = false;
   if (!ptr)
-    return ft_malloc(size);
+    return malloc(size);
   if (size == curr_size)
     return ptr;
   void *ret;
@@ -83,7 +83,7 @@ void *ft_realloc(void *ptr, size_t size) {
       ret = ptr;
     else {
       debugInfo("new malloc call on realloc");
-      void *new_ptr = ft_malloc(size);
+      void *new_ptr = malloc(size);
       printLine("omg1");
       if (!new_ptr) {
         ret = NULL;
@@ -104,6 +104,6 @@ void *ft_realloc(void *ptr, size_t size) {
     ft_memcpy(ret, ptr, n);
   }
   if (toFree)
-    ft_free(ptr);
+    free(ptr);
   return ret;
 }

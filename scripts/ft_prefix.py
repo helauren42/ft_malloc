@@ -10,11 +10,12 @@ FUNCTION_CALLS: list[Function_Call_Type] = ["malloc(", "realloc(", "free("]
 FILE_PATHS = ["./includes/ft_malloc.h", "./src/malloc.c", "./src/realloc.c", "./src/free.c"]
 
 # returns tuple of function called and its index
-def hasFunctionCall(line: str, index: int)-> tuple[int, Function_Call_Type] | None:
+def hasFunctionCall(line: str, startIndex: int)-> tuple[int, Function_Call_Type] | None:
     for function_call in FUNCTION_CALLS:
         if MODE == "POST":
             function_call = "ft_" + function_call
         print("Looking for: ", function_call)
+        index = startIndex
         index = line.find(function_call, index)
         if index >= 0:
             print("found function_call: ", line)

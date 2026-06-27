@@ -47,7 +47,7 @@ inline void prependFreeChunk(t_free_chunk *new_free_chunk, t_heap *heap) {
   }
 }
 
-void ft_free(void *ptr) {
+void free(void *ptr) {
   if (!ptr)
     return;
   g_global.function_called = FREE;
