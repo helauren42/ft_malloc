@@ -7,7 +7,7 @@ MODE: Mode_Type = "PRE"
 Function_Call_Type = Literal["malloc(", "realloc(", "free("]
 FUNCTION_CALLS: list[Function_Call_Type] = ["malloc(", "realloc(", "free("]
 
-FILE_PATHS = ["../includes/ft_malloc.h", "../src/malloc.c", "../src/realloc.c", "../src/free.c"]
+FILE_PATHS = ["./includes/ft_malloc.h", "./src/malloc.c", "./src/realloc.c", "./src/free.c"]
 
 # returns tuple of function called and its index
 def hasFunctionCall(line: str, index: int)-> tuple[int, Function_Call_Type] | None:
