@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-// int loops;
-
 inline size_t NewFreeChunkMinSize(const enum HEAP_TYPE heap_type) {
   static const size_t sizes[LARGE + 1] = {[TINY] = T_FREE_CHUNK_SIZE, [SMALL] = SMALL_MIN_PAYLOAD, [LARGE] = LARGE_MIN_PAYLOAD};
   return sizes[heap_type];
@@ -50,14 +48,10 @@ inline static void addNewFreeChunk(const size_t new_payload_size, t_free_chunk *
 // TODO check for heap metadata corruption
 static t_chunk *unfreeChunk(const size_t bytesNeeded, t_free_chunk *unfreeing, t_heap *heap, const enum HEAP_TYPE heap_type) {
   size_t new_payload_size = bytesNeeded < 16 ? 16 : bytesNeeded;
-  // printStr("unfreeing->payload_bytes: ");
-  // ft_putsize_t(unfreeing->payload_bytes, 1);
-  // printStr("\n");
   const size_t extra_bytes = unfreeing->payload_bytes - new_payload_size;
+  // if split_chunk is true we need to create new free chunk from the memory space that is left otherwise the chunk will be bigger than what has been requested
   const bool split_chunk = extra_bytes >= NewFreeChunkMinSize(heap_type);
   t_heap *first_heap = getHeapStart(heap_type);
-  // if true we need to create new free chunk from the memory space that is left
-  // otherwise the chunk will be bigger than what has been requested
   unfreeing->is_free = false;
   unfreeing->heap = heap;
   t_free_chunk *prev_free = unfreeing->prev_free;

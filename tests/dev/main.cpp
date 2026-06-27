@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -92,9 +93,21 @@ void testRealloc1() {
   cout << "NEW ADDR: " << hex << (uintptr_t)ptr2 - T_CHUNK_SIZE << endl;
 }
 
+void reallocCmp(const char *ptr, const char *expected) {
+  for (int i = 0; ptr[i] || expected[i]; i++) {
+    if (ptr[i] != expected[i]) {
+      cout << RED << "Realloc error: " << endl;
+      cout << "recv: " << ptr << endl;
+      cout << "expc: " << ptr << endl;
+      exit(1);
+    }
+  }
+}
+
 void testRealloc2() {
   Tester tester = Tester();
   char *ptr1 = (char *)tester.wrap_malloc(10, NULL);
+  cout << "1 malloc: " << hex << (uintptr_t)ptr1 << endl;
   char *ptr2 = (char *)tester.wrap_malloc(10, NULL);
   char *ptr3 = (char *)tester.wrap_malloc(10, NULL);
   char *ptr4 = (char *)tester.wrap_malloc(10, NULL);
@@ -106,34 +119,18 @@ void testRealloc2() {
   }
   cout << "\n\n\n\n\n" << "pre realloc" << endl;
   ptr1 = (char *)tester.wrap_realloc(21, ptr1);
-  cout << "1 realloc" << endl;
   ptr2 = (char *)tester.wrap_realloc(21, ptr2);
-  cout << "2 realloc" << endl;
   ptr3 = (char *)tester.wrap_realloc(21, ptr3);
-  cout << "3 realloc" << endl;
   ptr4 = (char *)tester.wrap_realloc(21, ptr4);
-  cout << "4 realloc" << endl;
   const char expected[] = "aaaaaaaaaa";
-  if (!strcmp(ptr1, expected)) {
-    cout << RED << "Realloc error" << endl;
-    exit(1);
-  }
-  if (!strcmp(ptr2, expected)) {
-    cout << RED << "Realloc error" << endl;
-    exit(1);
-  }
-  if (!strcmp(ptr3, expected)) {
-    cout << RED << "Realloc error" << endl;
-    exit(1);
-  }
-  if (!strcmp(ptr4, expected)) {
-    cout << RED << "Realloc error" << endl;
-    exit(1);
-  }
+  reallocCmp(ptr1, expected);
+  reallocCmp(ptr2, expected);
+  reallocCmp(ptr3, expected);
+  reallocCmp(ptr4, expected);
 }
 
 int main() {
-  // testRealloc1();
+  testRealloc1();
   testRealloc2();
   //  base();
   // speedTest200(70);

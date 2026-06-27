@@ -61,9 +61,21 @@ void base() {
   show_alloc_mem();
 }
 
+void reallocCmp(const char *ptr, const char *expected) {
+  for (int i = 0; ptr[i] || expected[i]; i++) {
+    if (ptr[i] != expected[i]) {
+      cout << RED << "Realloc error: " << endl;
+      cout << "recv: " << ptr << endl;
+      cout << "expc: " << ptr << endl;
+      exit(1);
+    }
+  }
+}
+
 void testRealloc() {
   Tester tester = Tester();
   char *ptr1 = (char *)tester.wrap_malloc(10, NULL);
+  cout << "1 malloc: " << hex << (uintptr_t)ptr1 << endl;
   char *ptr2 = (char *)tester.wrap_malloc(10, NULL);
   char *ptr3 = (char *)tester.wrap_malloc(10, NULL);
   char *ptr4 = (char *)tester.wrap_malloc(10, NULL);
@@ -73,27 +85,16 @@ void testRealloc() {
     ptr3[i] = 'a';
     ptr4[i] = 'a';
   }
+  cout << "\n\n\n\n\n" << "pre realloc" << endl;
   ptr1 = (char *)tester.wrap_realloc(21, ptr1);
   ptr2 = (char *)tester.wrap_realloc(21, ptr2);
   ptr3 = (char *)tester.wrap_realloc(21, ptr3);
   ptr4 = (char *)tester.wrap_realloc(21, ptr4);
   const char expected[] = "aaaaaaaaaa";
-  if (!strcmp(ptr1, expected)) {
-    cout << RED << "Realloc error" << endl;
-    exit(1);
-  }
-  if (!strcmp(ptr2, expected)) {
-    cout << RED << "Realloc error" << endl;
-    exit(1);
-  }
-  if (!strcmp(ptr3, expected)) {
-    cout << RED << "Realloc error" << endl;
-    exit(1);
-  }
-  if (!strcmp(ptr4, expected)) {
-    cout << RED << "Realloc error" << endl;
-    exit(1);
-  }
+  reallocCmp(ptr1, expected);
+  reallocCmp(ptr2, expected);
+  reallocCmp(ptr3, expected);
+  reallocCmp(ptr4, expected);
 }
 
 int main() {

@@ -1,6 +1,7 @@
 #include "ft_malloc.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
@@ -35,12 +36,12 @@ inline static t_free_chunk *mergePrev(t_free_chunk *new_free) {
 
 inline void prependFreeChunk(t_free_chunk *new_free_chunk, t_heap *heap) {
   if (!heap->first_free_chunk) {
-    printLine("!!! Setting new first free chunk");
     heap->first_free_chunk = new_free_chunk;
     new_free_chunk->prev_free = NULL;
     new_free_chunk->next_free = NULL;
   } else {
     new_free_chunk->next_free = heap->first_free_chunk;
+    new_free_chunk->prev_free = NULL;
     heap->first_free_chunk->prev_free = new_free_chunk;
     heap->first_free_chunk = new_free_chunk;
   }
@@ -70,8 +71,6 @@ void ft_free(void *ptr) {
   // if merged than there is no need to preprend
   const bool mergedNext = mergeNext(new_free);
   debugVal("2", "new_free->payload_bytes: ", new_free->payload_bytes);
-  printLine((uintptr_t)new_free != (uintptr_t)chunk ? "mergedPrev true" : "mergedPrev false");
-  printLine(mergedNext ? "mergedNext true" : "mergedNext false");
   if ((uintptr_t)new_free != (uintptr_t)chunk || mergedNext) {
     debugAddr("end first_free_chunk addr: ", heap->first_free_chunk);
     return;
