@@ -19,6 +19,7 @@ static inline void cpy_payload(const uint8_t *old, uint8_t *new, const size_t pa
 static inline bool try_expand(t_chunk *chunk, t_free_chunk *next, const size_t diff) {
   if (!chunk->next || !chunk->next->is_free)
     return false;
+  debugInfo("try expand really");
   static const size_t min_retractable_payload = T_CHUNK_SIZE - T_FREE_CHUNK_SIZE;
   const size_t new_next_payload_size = next->payload_bytes - diff;
   if (new_next_payload_size < min_retractable_payload)
@@ -73,6 +74,7 @@ void *ft_realloc(void *ptr, size_t size) {
   if (size == curr_size)
     return ptr;
   void *ret;
+  printLine("ft_realloc really");
   if (size == 0) {
     toFree = true;
     ret = NULL;
@@ -82,13 +84,14 @@ void *ft_realloc(void *ptr, size_t size) {
     else {
       debugInfo("new malloc call on realloc");
       void *new_ptr = ft_malloc(size);
-      if (!new_ptr)
+      printLine("omg1");
+      if (!new_ptr) {
         ret = NULL;
-      t_chunk *new_chunk = getHeaderAddr(new_ptr);
-      const size_t size_copied = new_chunk->payload_bytes < chunk->payload_bytes ? new_chunk->payload_bytes : chunk->payload_bytes;
-      ft_memcpy(new_ptr, ptr, size_copied);
+      }
+      printLine("omg");
       toFree = true;
       ret = new_ptr;
+      debugInfo("new addr assigned");
     }
   } else {
     retract(chunk, (t_free_chunk *)chunk->next, curr_size - size);

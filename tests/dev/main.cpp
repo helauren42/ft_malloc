@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <string.h>
 #include <unistd.h>
 
 #define SPEED_TEST_XXX_SIZE 1000
@@ -73,7 +74,7 @@ template <typename T> static void timeTest(const char *testName, T &&fn) {
   cout << ms.count() << "µs" << endl;
 }
 
-void testRealloc() {
+void testRealloc1() {
   Tester tester = Tester();
   char *ptr1 = (char *)tester.wrap_malloc(10, NULL);
   char *ptr2 = (char *)tester.wrap_malloc(10, NULL);
@@ -91,8 +92,49 @@ void testRealloc() {
   cout << "NEW ADDR: " << hex << (uintptr_t)ptr2 - T_CHUNK_SIZE << endl;
 }
 
+void testRealloc2() {
+  Tester tester = Tester();
+  char *ptr1 = (char *)tester.wrap_malloc(10, NULL);
+  char *ptr2 = (char *)tester.wrap_malloc(10, NULL);
+  char *ptr3 = (char *)tester.wrap_malloc(10, NULL);
+  char *ptr4 = (char *)tester.wrap_malloc(10, NULL);
+  for (int i = 0; i < 10; i++) {
+    ptr1[i] = 'a';
+    ptr2[i] = 'a';
+    ptr3[i] = 'a';
+    ptr4[i] = 'a';
+  }
+  cout << "\n\n\n\n\n" << "pre realloc" << endl;
+  ptr1 = (char *)tester.wrap_realloc(21, ptr1);
+  cout << "1 realloc" << endl;
+  ptr2 = (char *)tester.wrap_realloc(21, ptr2);
+  cout << "2 realloc" << endl;
+  ptr3 = (char *)tester.wrap_realloc(21, ptr3);
+  cout << "3 realloc" << endl;
+  ptr4 = (char *)tester.wrap_realloc(21, ptr4);
+  cout << "4 realloc" << endl;
+  const char expected[] = "aaaaaaaaaa";
+  if (!strcmp(ptr1, expected)) {
+    cout << RED << "Realloc error" << endl;
+    exit(1);
+  }
+  if (!strcmp(ptr2, expected)) {
+    cout << RED << "Realloc error" << endl;
+    exit(1);
+  }
+  if (!strcmp(ptr3, expected)) {
+    cout << RED << "Realloc error" << endl;
+    exit(1);
+  }
+  if (!strcmp(ptr4, expected)) {
+    cout << RED << "Realloc error" << endl;
+    exit(1);
+  }
+}
+
 int main() {
-  testRealloc();
+  // testRealloc1();
+  testRealloc2();
   //  base();
   // speedTest200(70);
   // timeTest("tinySpeed 1000", []() { speedTest200(10); });
