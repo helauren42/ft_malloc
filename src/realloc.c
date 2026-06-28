@@ -17,13 +17,18 @@ static inline void cpy_payload(const uint8_t *old, uint8_t *new, const size_t pa
 }
 
 static inline bool try_expand(t_chunk *chunk, t_free_chunk *next, const size_t diff) {
-  if (!chunk->next || !chunk->next->is_free)
+  pthread_mutex_lock(&g_global.mutex);
+  if (!chunk->next || !chunk->next->is_free) {
+    pthread_mutex_unlock(&g_global.mutex);
     return false;
+  }
   debugInfo("try expand really");
   static const size_t min_retractable_payload = T_CHUNK_SIZE - T_FREE_CHUNK_SIZE;
   const size_t new_next_payload_size = next->payload_bytes - diff;
-  if (new_next_payload_size < min_retractable_payload)
+  if (new_next_payload_size < min_retractable_payload) {
+    pthread_mutex_unlock(&g_global.mutex);
     return false;
+  }
   static uint8_t buffer[T_FREE_CHUNK_SIZE];
   cpy_header((uint8_t *)next, buffer); // prev next header stored in buffer on stack to not corrupt heap
 
@@ -33,10 +38,12 @@ static inline bool try_expand(t_chunk *chunk, t_free_chunk *next, const size_t d
   chunk->payload_bytes += diff;
   new_next->payload_bytes = new_next_payload_size;
   debugInfo("try expand on realloc");
+  pthread_mutex_unlock(&g_global.mutex);
   return true;
 }
 
 static inline void retract(t_chunk *chunk, t_free_chunk *next, const size_t diff) {
+  pthread_mutex_lock(&g_global.mutex);
   static const size_t min_payload_size = T_FREE_CHUNK_SIZE - T_CHUNK_SIZE;
   static uint8_t buffer[T_FREE_CHUNK_SIZE];
   if (next && next->is_free) {
@@ -63,18 +70,20 @@ static inline void retract(t_chunk *chunk, t_free_chunk *next, const size_t diff
     prependFreeChunk(new_free_chunk, heap);
     chunk->next = (t_chunk *)new_free_chunk;
   }
+  pthread_mutex_unlock(&g_global.mutex);
 }
 
 void *realloc(void *ptr, size_t size) {
   t_chunk *chunk = getHeaderAddr(ptr);
+  pthread_mutex_lock(&g_global.mutex);
   const size_t curr_size = chunk->payload_bytes;
+  pthread_mutex_unlock(&g_global.mutex);
   bool toFree = false;
   if (!ptr)
     return malloc(size);
   if (size == curr_size)
     return ptr;
   void *ret;
-  printLine("ft_realloc really");
   if (size == 0) {
     toFree = true;
     ret = NULL;
@@ -82,13 +91,10 @@ void *realloc(void *ptr, size_t size) {
     if (try_expand(chunk, (t_free_chunk *)chunk->next, size - curr_size))
       ret = ptr;
     else {
-      debugInfo("new malloc call on realloc");
       void *new_ptr = malloc(size);
-      printLine("omg1");
       if (!new_ptr) {
         ret = NULL;
       }
-      printLine("omg");
       toFree = true;
       ret = new_ptr;
       debugInfo("new addr assigned");

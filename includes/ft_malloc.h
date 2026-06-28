@@ -5,6 +5,7 @@ extern "C" {
 #ifndef FT_MALLOC
 #define FT_MALLOC
 
+#include <pthread.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -40,7 +41,7 @@ enum FUNCTION_CALLED { MALLOC, REALLOC, FREE };
 typedef struct s_chunk t_chunk;
 typedef struct s_free_chunk t_free_chunk;
 typedef struct s_heap t_heap;
-typedef struct s_arenas t_arenas;
+typedef struct s_glob t_glob;
 
 typedef struct s_chunk {
   t_chunk *next;
@@ -71,7 +72,8 @@ typedef struct s_heap {
   size_t size;
 } t_heap;
 
-typedef struct s_arenas {
+typedef struct s_glob {
+  // arenas
   t_heap *tiny_first;
   t_heap *small_first;
   t_heap *large_first;
@@ -79,7 +81,8 @@ typedef struct s_arenas {
   // t_heap *small_last;
   // t_heap *large_last;
   enum FUNCTION_CALLED function_called;
-} t_arenas;
+  pthread_mutex_t mutex;
+} t_glob;
 
 typedef struct s_mem_usage t_mem_usage;
 
@@ -88,7 +91,7 @@ typedef struct s_mem_usage {
   size_t bytes_used;
 } t_mem_usage;
 
-extern t_arenas g_global;
+extern t_glob g_global;
 
 // MAIN
 void free(void *ptr);

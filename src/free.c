@@ -58,11 +58,13 @@ void free(void *ptr) {
     errorDoubleFree();
     return;
   }
+  pthread_mutex_lock(&g_global.mutex);
   t_heap *heap = chunk->heap;
   debugAddr("start first_free_chunk addr: ", heap->first_free_chunk);
   heap->active_chunk_count--;
   if (heap->active_chunk_count == 0 && (heap->next || heap->prev)) {
     removeHeap(heap);
+    pthread_mutex_unlock(&g_global.mutex);
     return;
   }
   chunk->is_free = true;
@@ -73,10 +75,12 @@ void free(void *ptr) {
   debugVal("2", "new_free->payload_bytes: ", new_free->payload_bytes);
   if ((uintptr_t)new_free != (uintptr_t)chunk || mergedNext) {
     debugAddr("end first_free_chunk addr: ", heap->first_free_chunk);
+    pthread_mutex_unlock(&g_global.mutex);
     return;
   }
   // the prev and next free chunk pointers are in the payload and will be overwritten so we can't use those to reinsert the chunk
   prependFreeChunk(new_free, heap);
   printFreeChunks(heap);
   debugAddr("end first_free_chunk addr", heap->first_free_chunk);
+  pthread_mutex_unlock(&g_global.mutex);
 }

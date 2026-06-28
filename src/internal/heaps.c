@@ -1,10 +1,11 @@
 #include "ft_malloc.h"
+#include <pthread.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <sys/mman.h>
 
-t_arenas g_global = {NULL, NULL, NULL, 0};
+t_glob g_global = {NULL, NULL, NULL, 0, PTHREAD_MUTEX_INITIALIZER};
 
 inline t_heap **getFirstHeap(const enum HEAP_TYPE heap_type) {
   switch (heap_type) {

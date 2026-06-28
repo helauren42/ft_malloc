@@ -26,7 +26,7 @@ $(TEST_NAME):
 tests: $(TEST_NAME)
 	@$(MAKE) valid
 	@$(MAKE) error
-	@$(MAKE) valtests
+	@$(MAKE) system
 	@$(MAKE) speed
 
 valid:
@@ -40,9 +40,9 @@ error:
 	@python ./error/main.py
 	$(call end)
 
-valtests:
-	$(call start, valtests)
-	@python ./system/valtests.py
+system:
+	$(call start, system)
+	@python ./system/system.py
 	$(call end)
 
 speed:
@@ -68,4 +68,4 @@ fclean:
 
 re: fclean all
 
-.PHONY: all valid error speed dev gdb fclean re
+.PHONY: all valid error system speed dev gdb fclean re
