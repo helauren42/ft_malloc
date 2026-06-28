@@ -1,49 +1,71 @@
 MAKEFLAGS += --no-print-directory
-LIB_PATH = ../ft_libft_malloc.so
+TEST_NAME = test_malloc.so
 
 RM=/bin/rm
 
-define header
+define start
 	@echo ""
 	@echo "- - - - - Starting $@ tests - - - - -"
+	@cd .. && python ./scripts/ft_prefix.py PRE
 endef
 
-all:
-	cd .. && make re
+define end
+	@cd .. && python ./scripts/ft_prefix.py POST
+	@sleep 1
+endef
+
+all: $(TEST_NAME)
+
+$(TEST_NAME):
+	cd .. && python ./scripts/ft_prefix.py PRE
+	$(MAKE) -C .. clean
+	$(MAKE) -C .. NAME=$(TEST_NAME)
+	cd .. && mv $(TEST_NAME) ./tests/$(TEST_NAME)
+	cd .. && python ./scripts/ft_prefix.py POST
+
+tests: $(TEST_NAME)
 	@$(MAKE) valid
 	@$(MAKE) error
 	@$(MAKE) valtests
 	@$(MAKE) speed
 
 valid:
-	$(call header, valid)
-	@c++ -g3 -I ../includes ./src/tester.cpp ./valid/main.cpp $(LIB_PATH) -Wl,-rpath,.. && ./a.out && $(RM) a.out
-	@sleep 1
+	$(call start, valid)
+	@c++ -g3 -I ../includes ./src/tester.cpp ./valid/main.cpp $(TEST_NAME) -Wl,-rpath,. \
+	&& LD_LIBRARY_PATH=. ./a.out && $(RM) a.out
+	$(call end)
 
 error:
-	$(call header, error)
+	$(call start, error)
 	@python ./error/main.py
-	@sleep 1
+	$(call end)
 
 valtests:
-	$(call header, valtests)
+	$(call start, valtests)
 	@python ./system/valtests.py
-	@sleep 1
+	$(call end)
 
 speed:
-	cd .. && make re
-	$(call header, error)
-	@c++ -g3 -I ../includes ./src/tester.cpp ./speed/main.cpp $(LIB_PATH) -Wl,-rpath,.. && ./a.out && $(RM) a.out
-	@sleep 1
+	$(call start, error)
+	@c++ -g3 -I ../includes ./src/tester.cpp ./speed/main.cpp $(TEST_NAME) -Wl,-rpath,. \
+	&& LD_LIBRARY_PATH=. ./a.out && $(RM) a.out
+	$(call end)
 
 dev:
 	cd .. && make re
 	@echo ""
 	@echo ""
 	@echo ""
-	@c++ -g3 -I ../includes ./src/tester.cpp ./dev/main.cpp $(LIB_PATH) -Wl,-rpath,.. && ./a.out && $(RM) a.out
+	@c++ -g3 -I ../includes ./src/tester.cpp ./dev/main.cpp $(TEST_NAME) -Wl,-rpath,. \
+	&& LD_LIBRARY_PATH=. ./a.out && $(RM) a.out
 
 gdb:
-	@c++ -g3 -I ../includes ./src/tester.cpp ./dev/main.cpp $(LIB_PATH) -Wl,-rpath,.. && gdb -ex "set confirm off" -ex "start" ./a.out && $(RM) a.out
+	@c++ -g3 -I ../includes ./src/tester.cpp ./dev/main.cpp $(TEST_NAME) -Wl,-rpath,.. \
+		&& LD_LIBRARY_PATH=. gdb -ex "set confirm off" -ex "start" ./a.out && $(RM) a.out
 
-.PHONY: all valid error speed dev gdb
+fclean:
+	$(RM) $(TEST_NAME)
+
+re: fclean all
+
+.PHONY: all valid error speed dev gdb fclean re

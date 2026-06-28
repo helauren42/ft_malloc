@@ -14,11 +14,9 @@ def hasFunctionCall(line: str, startIndex: int)-> tuple[int, Function_Call_Type]
     for function_call in FUNCTION_CALLS:
         if MODE == "POST":
             function_call = "ft_" + function_call
-        print("Looking for: ", function_call)
         index = startIndex
         index = line.find(function_call, index)
         if index >= 0:
-            print("found function_call: ", line)
             return (index, function_call) # pyright: ignore
     return None
 
