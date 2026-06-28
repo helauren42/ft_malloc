@@ -15,6 +15,7 @@ define end
 endef
 
 all: $(TEST_NAME)
+	make tests
 
 $(TEST_NAME):
 	cd .. && python ./scripts/ft_prefix.py PRE
@@ -68,4 +69,4 @@ fclean:
 
 re: fclean all
 
-.PHONY: all valid error system speed dev gdb fclean re
+.PHONY: all tests valid error system speed dev gdb fclean re

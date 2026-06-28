@@ -8,7 +8,7 @@ static void writeStderr(char *str) {
   write(STDERR_FILENO, "\n", 1);
 }
 
-void errorHeapMetadataCorruption() {
+void errorHeapMetadataCorruption() { // unused
   switch (g_global.function_called) {
   case MALLOC:
     writeStderr("malloc(): heap metadata corrupted");
