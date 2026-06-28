@@ -8,13 +8,7 @@ inline size_t NewFreeChunkMinSize(const enum HEAP_TYPE heap_type) {
   return sizes[heap_type];
 }
 
-static inline void setFirstFreeChunk(t_heap *heap, t_free_chunk *new_free_chunk) {
-  heap->first_free_chunk = new_free_chunk;
-  // printStr("1:");
-  // printAddr(new_free_chunk, true);
-  // printStr("2:");
-  // printAddr(heap->first_free_chunk, true);
-}
+static inline void setFirstFreeChunk(t_heap *heap, t_free_chunk *new_free_chunk) { heap->first_free_chunk = new_free_chunk; }
 
 static inline void setFirstChunk(t_heap *g_global, t_chunk *curr_chunk) { g_global->first_chunk = (t_chunk *)curr_chunk; }
 
@@ -69,8 +63,6 @@ static t_chunk *unfreeChunk(const size_t bytesNeeded, t_free_chunk *unfreeing, t
   }
   if (!unfreeing->prev || heap->first_chunk == NULL)
     setFirstChunk(first_heap, (t_chunk *)unfreeing);
-  // printStr("UNFREED: "); // TODO logs?
-  // printAddr(curr_chunk, true);
   return (t_chunk *)unfreeing;
 }
 

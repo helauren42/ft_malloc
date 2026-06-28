@@ -52,8 +52,6 @@ void free(void *ptr) {
     return;
   g_global.function_called = FREE;
   t_chunk *chunk = getHeaderAddr(ptr);
-  // printStr("Freeing this addr:"); // TODO logs?
-  // printAddr(chunk, true);
   if (chunk->is_free) {
     errorDoubleFree();
     return;

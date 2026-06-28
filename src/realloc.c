@@ -10,11 +10,11 @@ static inline void cpy_header(const uint8_t *src, uint8_t *dest) {
   }
 }
 
-static inline void cpy_payload(const uint8_t *old, uint8_t *new, const size_t payload_bytes) {
-  for (size_t i = 0; i < payload_bytes; i++) {
-    new[i] = old[i];
-  }
-}
+// static inline void cpy_payload(const uint8_t *old, uint8_t *new, const size_t payload_bytes) {
+//   for (size_t i = 0; i < payload_bytes; i++) {
+//     new[i] = old[i];
+//   }
+// }
 
 static inline bool try_expand(t_chunk *chunk, t_free_chunk *next, const size_t diff) {
   pthread_mutex_lock(&g_global.mutex);
