@@ -17,7 +17,6 @@ void initString(char *dest, const char *val) {
 }
 
 void writing() {
-  write(1, "here1\n", 7);
   const int alloc_size = 30;
   const char text[] = "hello world\n";
   Tester tester = Tester();
