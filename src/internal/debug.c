@@ -21,7 +21,8 @@ inline void debugVal(const char *text, const char *charname, const size_t var) {
   if (!DEV)
     return;
   printStr(text);
-  printStr(" - ");
+  if (ft_strlen(text) > 0)
+    printStr(" - ");
   printStr(charname);
   printStr(": ");
   ft_putsize_t(var, 1);

@@ -1,9 +1,12 @@
 #include "ft_malloc.h"
+#include <pthread.h>
 #include <stdio.h>
 
-void *ft_malloc(size_t size) {
+void *malloc(size_t size) {
+  pthread_mutex_lock(&g_global.mutex);
   g_global.function_called = MALLOC;
   t_chunk *chunk = allocChunk(size);
+  pthread_mutex_unlock(&g_global.mutex);
   if (!chunk)
     return debugInfo("chunk not found"), NULL;
   return getPayloadAddr(chunk);

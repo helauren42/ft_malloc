@@ -30,3 +30,24 @@ char *ft_strcpy(char *dest, char *src) {
   dest[i] = src[i];
   return (dest);
 }
+
+void *ft_memcpy(void *dst, const void *src, size_t n) {
+  size_t i;
+  unsigned char *udst;
+  unsigned char *usrc;
+
+  i = 0;
+  udst = (unsigned char *)dst;
+  usrc = (unsigned char *)src;
+  if (!usrc)
+    return (udst);
+  if (!udst)
+    return (NULL);
+  if (n == 0)
+    return (dst);
+  while (i < n) {
+    udst[i] = usrc[i];
+    i++;
+  }
+  return udst;
+}

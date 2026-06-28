@@ -5,6 +5,7 @@ extern "C" {
 #ifndef FT_MALLOC
 #define FT_MALLOC
 
+#include <pthread.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -40,7 +41,7 @@ enum FUNCTION_CALLED { MALLOC, REALLOC, FREE };
 typedef struct s_chunk t_chunk;
 typedef struct s_free_chunk t_free_chunk;
 typedef struct s_heap t_heap;
-typedef struct s_arenas t_arenas;
+typedef struct s_glob t_glob;
 
 typedef struct s_chunk {
   t_chunk *next;
@@ -71,7 +72,8 @@ typedef struct s_heap {
   size_t size;
 } t_heap;
 
-typedef struct s_arenas {
+typedef struct s_glob {
+  // arenas
   t_heap *tiny_first;
   t_heap *small_first;
   t_heap *large_first;
@@ -79,7 +81,8 @@ typedef struct s_arenas {
   // t_heap *small_last;
   // t_heap *large_last;
   enum FUNCTION_CALLED function_called;
-} t_arenas;
+  pthread_mutex_t mutex;
+} t_glob;
 
 typedef struct s_mem_usage t_mem_usage;
 
@@ -88,12 +91,12 @@ typedef struct s_mem_usage {
   size_t bytes_used;
 } t_mem_usage;
 
-extern t_arenas g_global;
+extern t_glob g_global;
 
 // MAIN
-void ft_free(void *ptr);
-void *ft_malloc(size_t size);
-// void *realloc(void *ptr, size_t size);
+void free(void *ptr);
+void *malloc(size_t size);
+void *realloc(void *ptr, size_t size);
 void show_alloc_mem();
 void show_alloc_mem_ex();
 
@@ -110,7 +113,9 @@ t_heap **getFirstHeap(const enum HEAP_TYPE heap_type);
 void removeHeap(t_heap *heap);
 
 // CHUNKS
+size_t NewFreeChunkMinSize(const enum HEAP_TYPE heap_type);
 t_chunk *allocChunk(const size_t bytesNeeded);
+void prependFreeChunk(t_free_chunk *new_free_chunk, t_heap *heap);
 
 // UTILS
 enum HEAP_TYPE getHeapType(const size_t bytesNeeded);
@@ -121,6 +126,12 @@ t_chunk *getHeaderAddr(void *payload);
 // ERRORS
 void errorHeapMetadataCorruption();
 void errorDoubleFree();
+
+// PRINT
+void printLine(const char *str);
+void printStr(const char *str);
+void printAddr(const void *addr, const bool newline);
+void printVal(size_t val, char *varName);
 
 // DEBUGS
 void debugError(char *str);
@@ -136,12 +147,7 @@ char *ft_strcpy(char *dest, char *src);
 void ft_bzero(void *dst, const size_t n);
 void ft_putnbr_fd(long n, int fd);
 void ft_putsize_t(size_t n, int fd);
-
-// PRINT
-void printLine(const char *str);
-void printStr(const char *str);
-void printAddr(const void *addr, const bool newline);
-void printVal(size_t val, char *varName);
+void *ft_memcpy(void *dst, const void *src, size_t n);
 
 #endif
 

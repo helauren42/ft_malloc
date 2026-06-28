@@ -3,9 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-// int loops;
-//
-inline static size_t NewFreeChunkMinSize(const enum HEAP_TYPE heap_type) {
+inline size_t NewFreeChunkMinSize(const enum HEAP_TYPE heap_type) {
   static const size_t sizes[LARGE + 1] = {[TINY] = T_FREE_CHUNK_SIZE, [SMALL] = SMALL_MIN_PAYLOAD, [LARGE] = LARGE_MIN_PAYLOAD};
   return sizes[heap_type];
 }
@@ -26,12 +24,6 @@ inline static void addNewFreeChunk(const size_t new_payload_size, t_free_chunk *
   new_free_chunk->next = unfreeing->next;
   new_free_chunk->prev = (void *)unfreeing;
   new_free_chunk->payload_bytes = extra_bytes - T_CHUNK_SIZE;
-  if (new_free_chunk->payload_bytes > 24480)
-    debugVal("", "NOW COUNT", new_free_chunk->payload_bytes);
-  // if (loops >= 0) {
-  //   debugVal("", "new_free_chunk->payload_bytes", new_free_chunk->payload_bytes);
-  //   debugAddr("new_free_chunk addr: ", new_free_chunk);
-  // }
   new_free_chunk->is_free = true;
   new_free_chunk->next_free = next_free;
   new_free_chunk->prev_free = prev_free;
@@ -55,25 +47,16 @@ inline static void addNewFreeChunk(const size_t new_payload_size, t_free_chunk *
 
 // TODO check for heap metadata corruption
 static t_chunk *unfreeChunk(const size_t bytesNeeded, t_free_chunk *unfreeing, t_heap *heap, const enum HEAP_TYPE heap_type) {
-  size_t new_payload_size = bytesNeeded < 16 ? 16 + bytesNeeded : bytesNeeded;
-  // printStr("unfreeing->payload_bytes: ");
-  // ft_putsize_t(unfreeing->payload_bytes, 1);
-  // printStr("\n");
+  size_t new_payload_size = bytesNeeded < 16 ? 16 : bytesNeeded;
   const size_t extra_bytes = unfreeing->payload_bytes - new_payload_size;
+  // if split_chunk is true we need to create new free chunk from the memory space that is left otherwise the chunk will be bigger than what has been requested
   const bool split_chunk = extra_bytes >= NewFreeChunkMinSize(heap_type);
   t_heap *first_heap = getHeapStart(heap_type);
-  // if true we need to create new free chunk from the memory space that is left
-  // otherwise the chunk will be bigger than what has been requested
   unfreeing->is_free = false;
   unfreeing->heap = heap;
   t_free_chunk *prev_free = unfreeing->prev_free;
   t_free_chunk *next_free = unfreeing->next_free;
   if (split_chunk) {
-    // if (loops >= 0) {
-    //   debugVal("", "unfreeing->payload_bytes", unfreeing->payload_bytes);
-    //   debugVal("", "new_payload_size", new_payload_size);
-    //   debugVal("", "extra_bytes", extra_bytes);
-    // }
     addNewFreeChunk(new_payload_size, unfreeing, heap, prev_free, next_free, extra_bytes);
   } else {
     if (!prev_free) {
@@ -115,18 +98,11 @@ inline static t_chunk *findChunkInExistingHeaps(const enum HEAP_TYPE heap_type, 
 t_chunk *allocChunk(const size_t bytes_needed) {
   const enum HEAP_TYPE heap_type = getHeapType(bytes_needed);
   t_heap **first_heap = getFirstHeap(heap_type);
-  // if (loops >= 0 && first_heap && *first_heap) {
-  //   debugAddr("(*first_heap)->first_free_chunk", (*first_heap)->first_free_chunk);
-  //   if ((*first_heap)->first_free_chunk)
-  //     debugVal("", "(*first_heap)->first_free_chunk->payload_bytes", (*first_heap)->first_free_chunk->payload_bytes);
-  // }
   // if there is no first heap create a new heap and check it worked
   if (!first_heap || !*first_heap) {
     if (!newHeap(bytes_needed, heap_type))
       return debugError("Failed to create new heap\n"), NULL;
     first_heap = getFirstHeap(heap_type);
-    // if (loops >= 4)
-    //   printVal((*first_heap)->first_free_chunk->payload_bytes, "(*first_heap)->first_free_chunk->payload_bytes");
     if (!first_heap || !*first_heap)
       return debugError("get first heap returned null when newHeap succeeded"), NULL;
   }

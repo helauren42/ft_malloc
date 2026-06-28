@@ -1,3 +1,4 @@
+import os, time
 import subprocess, sys
 from pathlib import Path
 
@@ -5,15 +6,17 @@ RED = "\033[31m";
 GREEN = "\033[32m";
 RESET = "\033[0m";
 
-SYSTEM_TESTS_DIR = Path(__file__).resolve().parent
-
-def exec(cmd: str, custom: bool, path: str):
-    lib_path = Path.home() / "Projects/ft_malloc/libft_malloc.so"
+def exec(cmd: str, custom: bool, path: str, valgrind: bool, killtime: int)-> str:
+    lib_path = Path.joinpath(Path.cwd(), "../libft_malloc.so").resolve()
     preload = f"LD_PRELOAD={lib_path}" if custom else ""
-    stderr = subprocess.run([f"(sleep 3 && pkill -f valgrind) & make && {preload} valgrind --leak-check=full  --show-leak-kinds=all ./{cmd}"], shell=True, capture_output=True, cwd=Path.joinpath(SYSTEM_TESTS_DIR, path)).stderr
-    return stderr.decode()
+    killstr = f"(sleep {killtime} && pkill -f valgrind) &" if killtime > 0 else ""
+    valstr = f"valgrind --leak-check=full  --show-leak-kinds=all" if valgrind else ""
+    process = subprocess.run([f"{killstr} make && {preload} {valstr} ./{cmd}"], shell=True, capture_output=True, cwd=Path.joinpath(Path.cwd(), "./system/", path).resolve())
+    if valgrind == False:
+        return process.stdout.decode()
+    return process.stderr.decode()
 
-def test(og: str, custom: str):
+def valtest(og: str, custom: str):
     og_lines = og.splitlines()
     custom_lines = custom.splitlines()
     found = False
@@ -39,12 +42,24 @@ def test(og: str, custom: str):
             print("CUSTOM: ", custom_lines[i])
             sys.exit(1)
 
-def run(cmd: str, path: str):
-    test(exec(cmd, False, path), exec(cmd, True, path))
+def valtests():
+    cmd='./AMAZING'
+    path="./AICu/"
+    killtime=5
+    valtest(exec(cmd, False, path, True, killtime), exec(cmd, True, path, True, killtime))
     print(f"{GREEN}{path} Success{RESET}")
 
+def nonValtests():
+    cmd='./philo 5 800 200 200 7'
+    path="./philo/"
+    print("Check that the philosophers output is valid:")
+    time.sleep(2)
+    print(exec(cmd, True, path, False, 0))
+    time.sleep(8)
+
 def main():
-    run(cmd='./AMAZING', path="./AICu/")
+    valtests()
+    nonValtests()
     sys.exit(0)
 
 main()

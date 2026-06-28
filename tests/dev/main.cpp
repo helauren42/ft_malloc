@@ -1,6 +1,12 @@
 #include "../src/tester.cpp"
 #include "ft_malloc.h"
 #include <chrono>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <stdint.h>
+#include <string.h>
+#include <unistd.h>
 
 #define SPEED_TEST_XXX_SIZE 1000
 
@@ -44,8 +50,7 @@ void base1() {
   tester.wrap_free(ptr);
 }
 
-inline static void
-speedTest200(const size_t val) {
+inline static void speedTest200(const size_t val) {
   void *addresses[SPEED_TEST_XXX_SIZE];
   for (int i = 0; i < SPEED_TEST_XXX_SIZE; i++) {
     void *ptr = ft_malloc(val);
@@ -58,8 +63,7 @@ speedTest200(const size_t val) {
   }
 }
 
-template <typename T>
-static void timeTest(const char *testName, T &&fn) {
+template <typename T> static void timeTest(const char *testName, T &&fn) {
   cout << testName << ": ";
   struct timespec start;
   clock_gettime(CLOCK_REALTIME, &start);
@@ -71,15 +75,71 @@ static void timeTest(const char *testName, T &&fn) {
   cout << ms.count() << "µs" << endl;
 }
 
+void testRealloc1() {
+  Tester tester = Tester();
+  char *ptr1 = (char *)tester.wrap_malloc(10, NULL);
+  char *ptr2 = (char *)tester.wrap_malloc(10, NULL);
+  // char *ptr3 = (char *)tester.wrap_malloc(10, NULL);
+  // char *ptr4 = (char *)tester.wrap_malloc(10, NULL);
+  cout << "1 ADDR: " << hex << (uintptr_t)ptr1 - T_CHUNK_SIZE << endl;
+  cout << "2 ADDR: " << hex << (uintptr_t)ptr2 - T_CHUNK_SIZE << endl;
+  // cout << "3 ADDR: " << hex << (uintptr_t)ptr3 - T_CHUNK_SIZE << endl;
+  // cout << "4 ADDR: " << hex << (uintptr_t)ptr4 - T_CHUNK_SIZE << endl;
+  for (int i = 0; i < 10; i++)
+    ptr2[i] = 'a';
+  cout << "PRE: " << ptr2 << endl;
+  ptr2 = (char *)tester.wrap_realloc(21, ptr2);
+  cout << "POST: " << ptr2 << endl;
+  cout << "NEW ADDR: " << hex << (uintptr_t)ptr2 - T_CHUNK_SIZE << endl;
+}
+
+void reallocCmp(const char *ptr, const char *expected) {
+  for (int i = 0; ptr[i] || expected[i]; i++) {
+    if (ptr[i] != expected[i]) {
+      cout << RED << "Realloc error: " << endl;
+      cout << "recv: " << ptr << endl;
+      cout << "expc: " << ptr << endl;
+      exit(1);
+    }
+  }
+}
+
+void testRealloc2() {
+  Tester tester = Tester();
+  char *ptr1 = (char *)tester.wrap_malloc(10, NULL);
+  cout << "1 malloc: " << hex << (uintptr_t)ptr1 << endl;
+  char *ptr2 = (char *)tester.wrap_malloc(10, NULL);
+  char *ptr3 = (char *)tester.wrap_malloc(10, NULL);
+  char *ptr4 = (char *)tester.wrap_malloc(10, NULL);
+  for (int i = 0; i < 10; i++) {
+    ptr1[i] = 'a';
+    ptr2[i] = 'a';
+    ptr3[i] = 'a';
+    ptr4[i] = 'a';
+  }
+  cout << "\n\n\n\n\n" << "pre realloc" << endl;
+  ptr1 = (char *)tester.wrap_realloc(21, ptr1);
+  ptr2 = (char *)tester.wrap_realloc(21, ptr2);
+  ptr3 = (char *)tester.wrap_realloc(21, ptr3);
+  ptr4 = (char *)tester.wrap_realloc(21, ptr4);
+  const char expected[] = "aaaaaaaaaa";
+  reallocCmp(ptr1, expected);
+  reallocCmp(ptr2, expected);
+  reallocCmp(ptr3, expected);
+  reallocCmp(ptr4, expected);
+}
+
 int main() {
+  testRealloc1();
+  testRealloc2();
   //  base();
-  speedTest200(70);
-  timeTest("tinySpeed 1000", []() { speedTest200(10); });
-  timeTest("tinySpeed 1000", []() { speedTest200(10); });
-  timeTest("tinySpeed 1000", []() { speedTest200(10); });
-  timeTest("tinySpeed 1000", []() { speedTest200(10); });
-  timeTest("tinySpeed 1000", []() { speedTest200(10); });
-  timeTest("tinySpeed 1000", []() { speedTest200(10); });
-  timeTest("tinySpeed 1000", []() { speedTest200(10); });
-  timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  // speedTest200(70);
+  // timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  // timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  // timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  // timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  // timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  // timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  // timeTest("tinySpeed 1000", []() { speedTest200(10); });
+  // timeTest("tinySpeed 1000", []() { speedTest200(10); });
 }

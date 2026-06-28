@@ -1,13 +1,38 @@
 #include "../src/tester.cpp"
 #include "ft_malloc.h"
+#include <cstdlib>
 #include <string.h>
+#include <unistd.h>
+
+#define WRITING_TEST_SIZE 20
 
 int loops = 0;
+
+void initString(char *dest, const char *val) {
+  int i = 0;
+  while (val[i]) {
+    dest[i] = val[i];
+    i++;
+  }
+}
+
+void writing() {
+  write(1, "here1\n", 7);
+  const int alloc_size = 30;
+  const char text[] = "hello world\n";
+  Tester tester = Tester();
+  char *mem[WRITING_TEST_SIZE];
+  for (int i = 0; i < WRITING_TEST_SIZE; i++) {
+    mem[i] = (char *)tester.wrap_malloc(alloc_size, 0);
+    initString(mem[i], text);
+    write(1, mem[i], 12);
+  }
+  show_alloc_mem();
+}
 
 void base() {
   Tester tester = Tester();
   char *tiny1 = (char *)tester.wrap_malloc(sizeof(char) * 82, 0);
-  char text[] = "hello world!";
   char *tiny2 = (char *)tester.wrap_malloc(sizeof(char) * 107, 0);
   t_nest *tiny3 = (t_nest *)tester.wrap_malloc(sizeof(t_nest), 0);
   t_test *tiny4 = (t_test *)tester.wrap_malloc(sizeof(t_test), 0);
@@ -36,7 +61,45 @@ void base() {
   show_alloc_mem();
 }
 
+void reallocCmp(const char *ptr, const char *expected) {
+  for (int i = 0; ptr[i] || expected[i]; i++) {
+    if (ptr[i] != expected[i]) {
+      cout << RED << "Realloc error: " << endl;
+      cout << "recv: " << ptr << endl;
+      cout << "expc: " << ptr << endl;
+      exit(1);
+    }
+  }
+}
+
+void testRealloc() {
+  Tester tester = Tester();
+  char *ptr1 = (char *)tester.wrap_malloc(10, NULL);
+  cout << "1 malloc: " << hex << (uintptr_t)ptr1 << endl;
+  char *ptr2 = (char *)tester.wrap_malloc(10, NULL);
+  char *ptr3 = (char *)tester.wrap_malloc(10, NULL);
+  char *ptr4 = (char *)tester.wrap_malloc(10, NULL);
+  for (int i = 0; i < 10; i++) {
+    ptr1[i] = 'a';
+    ptr2[i] = 'a';
+    ptr3[i] = 'a';
+    ptr4[i] = 'a';
+  }
+  cout << "\n\n\n\n\n" << "pre realloc" << endl;
+  ptr1 = (char *)tester.wrap_realloc(21, ptr1);
+  ptr2 = (char *)tester.wrap_realloc(21, ptr2);
+  ptr3 = (char *)tester.wrap_realloc(21, ptr3);
+  ptr4 = (char *)tester.wrap_realloc(21, ptr4);
+  const char expected[] = "aaaaaaaaaa";
+  reallocCmp(ptr1, expected);
+  reallocCmp(ptr2, expected);
+  reallocCmp(ptr3, expected);
+  reallocCmp(ptr4, expected);
+}
+
 int main() {
   base();
+  writing();
+  testRealloc();
   return 0;
 }

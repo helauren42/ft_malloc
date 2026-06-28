@@ -1,6 +1,7 @@
 #include "ft_malloc.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
@@ -33,33 +34,37 @@ inline static t_free_chunk *mergePrev(t_free_chunk *new_free) {
   return (t_free_chunk *)prev_free;
 }
 
-inline static void prependFreeChunk(t_free_chunk *new_free_chunk, t_heap *heap) {
+inline void prependFreeChunk(t_free_chunk *new_free_chunk, t_heap *heap) {
   if (!heap->first_free_chunk) {
     heap->first_free_chunk = new_free_chunk;
     new_free_chunk->prev_free = NULL;
     new_free_chunk->next_free = NULL;
   } else {
     new_free_chunk->next_free = heap->first_free_chunk;
+    new_free_chunk->prev_free = NULL;
+    heap->first_free_chunk->prev_free = new_free_chunk;
     heap->first_free_chunk = new_free_chunk;
   }
 }
 
-void ft_free(void *ptr) {
+void free(void *ptr) {
   if (!ptr)
     return;
   g_global.function_called = FREE;
   t_chunk *chunk = getHeaderAddr(ptr);
-  // printStr("Freeding this addr:"); // TODO logs?
+  // printStr("Freeing this addr:"); // TODO logs?
   // printAddr(chunk, true);
   if (chunk->is_free) {
     errorDoubleFree();
     return;
   }
+  pthread_mutex_lock(&g_global.mutex);
   t_heap *heap = chunk->heap;
   debugAddr("start first_free_chunk addr: ", heap->first_free_chunk);
   heap->active_chunk_count--;
   if (heap->active_chunk_count == 0 && (heap->next || heap->prev)) {
     removeHeap(heap);
+    pthread_mutex_unlock(&g_global.mutex);
     return;
   }
   chunk->is_free = true;
@@ -70,10 +75,12 @@ void ft_free(void *ptr) {
   debugVal("2", "new_free->payload_bytes: ", new_free->payload_bytes);
   if ((uintptr_t)new_free != (uintptr_t)chunk || mergedNext) {
     debugAddr("end first_free_chunk addr: ", heap->first_free_chunk);
+    pthread_mutex_unlock(&g_global.mutex);
     return;
   }
   // the prev and next free chunk pointers are in the payload and will be overwritten so we can't use those to reinsert the chunk
   prependFreeChunk(new_free, heap);
   printFreeChunks(heap);
-  debugAddr("endfirst_free_chunk addr", heap->first_free_chunk);
+  debugAddr("end first_free_chunk addr", heap->first_free_chunk);
+  pthread_mutex_unlock(&g_global.mutex);
 }

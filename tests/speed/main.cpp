@@ -33,12 +33,13 @@ inline static void speedTestXXX(const size_t payloadSize) {
 }
 
 inline static void speedTestFuncRaw(const size_t val, const size_t rounds) {
+  ft_malloc(val);
   for (loops = 0; loops < rounds; loops++) {
     void *ptr1 = ft_malloc(val);
     void *ptr = ft_malloc(val);
     // cout << "global's first_free_chunk: " << g_global.tiny_first->first_free_chunk << endl;
+    // ft_free(ptr1);
     ft_free(ptr);
-    ft_free(ptr1);
     if (!ptr1 || !ptr) {
       throw runtime_error("malloc failed");
     }
@@ -63,10 +64,10 @@ template <typename T> static void timeTest(const char *testName, T &&fn) {
 }
 
 int main() {
-  Tester tester = Tester();
-  void *ptr = tester.wrap_malloc(80, 0);
-  ptr = tester.wrap_malloc(80, ptr);
-  tester.wrap_free(ptr);
+  // Tester tester = Tester();
+  // void *ptr = tester.wrap_malloc(80, 0);
+  // ptr = tester.wrap_malloc(80, ptr);
+  // tester.wrap_free(ptr);
   // TINY
   timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
   timeTest("tinySpeed raw", []() { speedTestFuncRaw(50, 1000); });
