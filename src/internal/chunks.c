@@ -1,4 +1,5 @@
 #include "ft_malloc.h"
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <unistd.h>

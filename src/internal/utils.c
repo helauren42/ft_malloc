@@ -5,7 +5,7 @@
 inline enum HEAP_TYPE getHeapType(const size_t bytesNeeded) {
   if (bytesNeeded <= TINY_MAX_PAYLOAD)
     return TINY;
-  else if (bytesNeeded < SMALL_MAX_PAYLOAD)
+  else if (bytesNeeded <= SMALL_MAX_PAYLOAD)
     return SMALL;
   return LARGE;
 }

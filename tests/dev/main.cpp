@@ -129,9 +129,16 @@ void testRealloc2() {
   reallocCmp(ptr4, expected);
 }
 
+void test1() {
+  for (int i = 0; i < 1024; i++) {
+    void *ptr = ft_malloc(130);
+  }
+}
+
 int main() {
-  testRealloc1();
-  testRealloc2();
+  test1();
+  // testRealloc1();
+  // testRealloc2();
   //  base();
   // speedTest200(70);
   // timeTest("tinySpeed 1000", []() { speedTest200(10); });

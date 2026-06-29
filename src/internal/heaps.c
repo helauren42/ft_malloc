@@ -36,7 +36,7 @@ inline static size_t newHeapSize(const size_t payloadSize, const enum HEAP_TYPE 
   else if (heap_type == SMALL)
     return SMALL_HEAP_SIZE;
   else {
-    size_t ret = SMALL_HEAP_SIZE;
+    size_t ret = PAGE_SIZE;
     while (ret < payloadSize + T_HEAP_SIZE + T_CHUNK_SIZE)
       ret += PAGE_SIZE;
     return ret;

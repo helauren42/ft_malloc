@@ -11,6 +11,12 @@ CFLAGS = -Wall -Wextra -Werror -g3 -fPIC
 
 H_FILES = -I ./includes/
 
+define 42testfunc
+	cd malloc_docs && cc $1 && mv a.out ../a.out
+	# ./malloc_docs/run_linux.sh /usr/bin/time -v ./a.out
+	LD_PRELOAD=libft_malloc.so LD_LIBRARY_PATH=. ./a.out
+endef
+
 all: $(NAME)
 
 $(NAME): $(OBJS)
@@ -26,6 +32,9 @@ fclean: clean
 	$(RM) $(NAME)
 
 re: fclean all
+
+42test:
+	$(call 42testfunc,test1.c)
 
 update_source:
 	python ./scripts/update_makefile_srcs.py
