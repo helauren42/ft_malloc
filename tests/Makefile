@@ -1,7 +1,9 @@
 MAKEFLAGS += --no-print-directory
+HOSTTYPE = test
+TEMP_NAME = libft_malloc_$(HOSTTYPE).so
 TEST_NAME = test_malloc.so
 
-RM=/bin/rm
+RM=/bin/rm -rf
 
 define start
 	@echo ""
@@ -15,13 +17,13 @@ define end
 endef
 
 all: $(TEST_NAME)
-	make tests
+	# make tests
 
 $(TEST_NAME):
 	cd .. && python ./scripts/ft_prefix.py PRE
 	$(MAKE) -C .. clean
-	$(MAKE) -C .. NAME=$(TEST_NAME)
-	cd .. && mv $(TEST_NAME) ./tests/$(TEST_NAME)
+	$(MAKE) -C .. HOSTTYPE=$(HOSTTYPE) TEST_MODE=1
+	cd .. && mv $(TEMP_NAME) ./tests/$(TEST_NAME) && $(RM) $(TEMP_NAME)
 	cd .. && python ./scripts/ft_prefix.py POST
 
 tests: $(TEST_NAME)

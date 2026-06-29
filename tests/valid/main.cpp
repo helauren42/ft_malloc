@@ -1,5 +1,5 @@
 #include "../src/tester.cpp"
-#include "ft_malloc.h"
+#include "malloc.h"
 #include <cstdlib>
 #include <string.h>
 #include <unistd.h>

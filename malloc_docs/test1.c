@@ -10,7 +10,7 @@ int main(void) {
 
   i = 0;
   while (i < 1024) {
-    addr = (char *)malloc(1026);
+    addr = (char *)malloc(1024);
     if (addr == NULL) {
       print("Failed to allocate memory\n");
       return (1);

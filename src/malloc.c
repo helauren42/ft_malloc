@@ -1,6 +1,7 @@
 #include "ft_malloc.h"
 #include <pthread.h>
 #include <stdio.h>
+#include <unistd.h>
 
 void *malloc(size_t size) {
   pthread_mutex_lock(&g_global.mutex);

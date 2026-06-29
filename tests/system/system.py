@@ -1,4 +1,5 @@
-import os, time
+import os
+import time
 import subprocess, sys
 from pathlib import Path
 
@@ -6,14 +7,22 @@ RED = "\033[31m";
 GREEN = "\033[32m";
 RESET = "\033[0m";
 
+LD_LIBRARY_PATH=".."
+LD_PRELOAD="libft_malloc.so"
+
 def exec(cmd: str, custom: bool, path: str, valgrind: bool, killtime: int)-> str:
-    lib_path = Path.joinpath(Path.cwd(), "../libft_malloc.so").resolve()
-    preload = f"LD_PRELOAD={lib_path}" if custom else ""
+    preload = f"LD_LIBRARY_PATH={LD_LIBRARY_PATH} LD_PRELOAD={LD_PRELOAD}" if custom else ""
+    filepath = os.path.join(os.getcwd(), LD_LIBRARY_PATH, LD_PRELOAD)
+    if Path(filepath).is_symlink():
+        print("libft_malloc.so path exists")
+    else:
+        print("libft_malloc.so path does not exist")
+        sys.exit(1)
     killstr = f"(sleep {killtime} && pkill -f valgrind) &" if killtime > 0 else ""
     valstr = f"valgrind --leak-check=full  --show-leak-kinds=all" if valgrind else ""
     process = subprocess.run([f"{killstr} make && {preload} {valstr} ./{cmd}"], shell=True, capture_output=True, cwd=Path.joinpath(Path.cwd(), "./system/", path).resolve())
     if valgrind == False:
-        return process.stdout.decode()
+        return  process.stdout.decode()
     return process.stderr.decode()
 
 def valtest(og: str, custom: str):
