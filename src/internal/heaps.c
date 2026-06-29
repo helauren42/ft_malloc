@@ -1,4 +1,4 @@
-#include "ft_malloc.h"
+#include "malloc.h"
 #include <pthread.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -30,20 +30,24 @@ inline static t_heap *newLimitedHeap(const enum HEAP_TYPE heap_type) {
   return new_heap;
 }
 
-inline static size_t newHeapSize(const size_t payloadSize, const enum HEAP_TYPE heap_type) {
+// TODO add header to caculation
+/*
+ * @param heapMinSize is payload size + chunk header size + heap header size
+ * */
+inline static size_t newHeapSize(const size_t heapMinSize, const enum HEAP_TYPE heap_type) {
   if (heap_type == TINY)
     return TINY_HEAP_SIZE;
   else if (heap_type == SMALL)
     return SMALL_HEAP_SIZE;
   else {
     size_t ret = PAGE_SIZE;
-    while (ret < payloadSize + T_HEAP_SIZE + T_CHUNK_SIZE)
+    while (ret < heapMinSize + T_HEAP_SIZE + T_CHUNK_SIZE)
       ret += PAGE_SIZE;
     return ret;
   }
 }
 
-inline static void initNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_type, const size_t bytesRequested) {
+inline static void initNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_type, const size_t heapMinSize) {
   static const size_t HEADERS_SIZE = T_HEAP_SIZE + T_CHUNK_SIZE;
   // new heap
   new_heap->heap_type = heap_type;
@@ -52,7 +56,7 @@ inline static void initNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_type,
   new_heap->first_free_chunk = (void *)new_heap + T_HEAP_SIZE;
   new_heap->first_chunk = NULL;
   new_heap->active_chunk_count = 0;
-  new_heap->size = newHeapSize(bytesRequested, heap_type);
+  new_heap->size = newHeapSize(heapMinSize, heap_type);
   // first_free_chunk
   t_free_chunk *first_free_chunk = new_heap->first_free_chunk;
   first_free_chunk->prev = NULL;
@@ -68,7 +72,7 @@ inline static void initNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_type,
     first_free_chunk->payload_bytes = SMALL_HEAP_SIZE - HEADERS_SIZE;
     break;
   case LARGE:
-    first_free_chunk->payload_bytes = newHeapSize(bytesRequested, heap_type) - HEADERS_SIZE; // TOCHECK
+    first_free_chunk->payload_bytes = newHeapSize(heapMinSize, heap_type) - HEADERS_SIZE; // TOCHECK
     break;
   default:
     debugError("errorHeapMetadataCorruption default case");
@@ -102,16 +106,16 @@ inline static void appendNewHeap(t_heap *new_heap, const enum HEAP_TYPE heap_typ
   }
 }
 
-inline t_heap *newHeap(const size_t bytesRequested, const enum HEAP_TYPE heap_type) {
+inline t_heap *newHeap(const enum HEAP_TYPE heap_type, const size_t heapMinSize) {
   t_heap *new_heap;
   if (heap_type == LARGE) {
-    new_heap = mmap(NULL, bytesRequested, MMAP_PROT, MMAP_FLAGS, -1, 0);
+    new_heap = mmap(NULL, heapMinSize, MMAP_PROT, MMAP_FLAGS, -1, 0);
   } else {
     new_heap = newLimitedHeap(heap_type);
   }
   if (new_heap == MAP_FAILED)
     return debugError("map failed bruhh"), NULL;
-  initNewHeap(new_heap, heap_type, bytesRequested);
+  initNewHeap(new_heap, heap_type, heapMinSize);
   appendNewHeap(new_heap, heap_type);
   return new_heap;
 }

@@ -1,4 +1,4 @@
-#include "ft_malloc.h"
+#include "malloc.h"
 
 void ft_bzero(void *dst, const size_t n) {
   unsigned int i;

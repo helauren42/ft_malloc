@@ -135,8 +135,18 @@ void test1() {
   }
 }
 
+void big() {
+  void *ptr1 = ft_malloc(16 * 1024 * 1024);
+  // for (int i = 0; i > 0; i++) {
+  //   if (i == 1000000)
+  //     i = 0;
+  // }
+  // void *ptr2 = ft_malloc(1024 * 1024 * 1024); // 1 GB
+}
+
 int main() {
-  test1();
+  big();
+  //   test1();
   // testRealloc1();
   // testRealloc2();
   //  base();

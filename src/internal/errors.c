@@ -1,4 +1,4 @@
-#include "ft_malloc.h"
+#include "malloc.h"
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -10,13 +10,13 @@ static void writeStderr(char *str) {
 
 void errorHeapMetadataCorruption() { // unused
   switch (g_global.function_called) {
-  case MALLOC:
+  case MALLOC_FUNC:
     writeStderr("malloc(): heap metadata corrupted");
     break;
-  case REALLOC:
+  case REALLOC_FUNC:
     writeStderr("realloc(): heap metadata corrupted");
     break;
-  case FREE:
+  case FREE_FUNC:
     writeStderr("free(): heap metadata corrupted");
     break;
   default:

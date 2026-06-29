@@ -4,6 +4,7 @@ endif
 
 NAME = libft_malloc_$(HOSTTYPE).so
 LIB_NAME = libft_malloc.so
+TEST_MODE = 0
 
 SRCS := src/free.c src/internal/chunks.c src/internal/debug.c src/internal/errors.c src/internal/heaps.c src/internal/libft.c src/internal/print.c src/internal/show_alloc.c src/internal/utils.c src/malloc.c src/realloc.c src/show_alloc_mem.c src/show_alloc_mem_ex.c
 SRC_DIR=src/
@@ -27,8 +28,10 @@ all: $(NAME)
 
 $(NAME): $(OBJS)
 	$(CC) $(OBJS) -shared -o $@
-	$(RM) $(LIB_NAME)
-	ln -s $(NAME) $(LIB_NAME)
+	if [ $(TEST_MODE) = 0 ]; then \
+		$(RM) $(LIB_NAME); \
+		ln -s $(NAME) $(LIB_NAME); \
+	fi
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(H_FILES) -c $< -o $@
@@ -37,12 +40,21 @@ clean:
 	$(RM) $(OBJS)
 
 fclean: clean
-	$(RM) $(NAME)
+	$(RM) $(NAME) $(LIB_NAME) libft_malloc*.so
 
 re: fclean all
 
-42test:
+42solo:
+	$(call 42testfunc,test4.c)
+
+42todos:
 	$(call 42testfunc,test0.c)
+	$(call 42testfunc,test1.c)
+	$(call 42testfunc,test2.c)
+	$(call 42testfunc,test3.c)
+	$(call 42testfunc,test4.c)
+	gcc -o test4 ./malloc_docs/test4.c -L. -lft_malloc && ./malloc_docs/run_linux.sh ./test4
+	$(call 42testfunc,test5.c)
 
 update_source:
 	python ./scripts/update_makefile_srcs.py

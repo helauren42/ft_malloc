@@ -1,6 +1,7 @@
-#include "ft_malloc.h"
+#include "malloc.h"
 
 void show_alloc_mem() {
+  printLine("start of func");
   t_mem_usage totalMem = {0, 0};
   t_mem_usage toAdd = {0, 0};
 

@@ -1,4 +1,4 @@
-#include "ft_malloc.h"
+#include "malloc.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -88,22 +88,23 @@ inline static t_chunk *findChunkInExistingHeaps(const enum HEAP_TYPE heap_type, 
 }
 
 // retrieve last heap from newHeap returned val and trim this up
-t_chunk *allocChunk(const size_t bytes_needed) {
-  const enum HEAP_TYPE heap_type = getHeapType(bytes_needed);
+inline t_chunk *allocChunk(const size_t payloadSize) {
+  const enum HEAP_TYPE heap_type = getHeapType(payloadSize);
+  const size_t heapMinSize = payloadSize + T_HEAP_SIZE + T_CHUNK_SIZE;
   t_heap **first_heap = getFirstHeap(heap_type);
   // if there is no first heap create a new heap and check it worked
   if (!first_heap || !*first_heap) {
-    if (!newHeap(bytes_needed, heap_type))
+    if (!newHeap(heap_type, heapMinSize))
       return debugError("Failed to create new heap\n"), NULL;
     first_heap = getFirstHeap(heap_type);
     if (!first_heap || !*first_heap)
       return debugError("get first heap returned null when newHeap succeeded"), NULL;
   }
-  t_chunk *new_chunk = findChunkInExistingHeaps(heap_type, *first_heap, bytes_needed);
+  t_chunk *new_chunk = findChunkInExistingHeaps(heap_type, *first_heap, payloadSize + T_CHUNK_SIZE);
   if (!new_chunk) {
-    if (!newHeap(bytes_needed, heap_type))
+    if (!newHeap(heap_type, heapMinSize))
       return NULL;
-    new_chunk = findChunkInExistingHeaps(heap_type, *first_heap, bytes_needed);
+    new_chunk = findChunkInExistingHeaps(heap_type, *first_heap, payloadSize + T_CHUNK_SIZE);
     if (!new_chunk)
       return debugError("Failed to allocatate chunk"), NULL;
   }

@@ -1,4 +1,4 @@
-#include "ft_malloc.h"
+#include "malloc.h"
 #include <stddef.h>
 
 inline void printLine(const char *str) {

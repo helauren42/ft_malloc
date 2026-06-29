@@ -1,4 +1,4 @@
-#include "ft_malloc.h"
+#include "malloc.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -50,7 +50,7 @@ inline void prependFreeChunk(t_free_chunk *new_free_chunk, t_heap *heap) {
 void free(void *ptr) {
   if (!ptr)
     return;
-  g_global.function_called = FREE;
+  g_global.function_called = FREE_FUNC;
   t_chunk *chunk = getHeaderAddr(ptr);
   if (chunk->is_free) {
     errorDoubleFree();

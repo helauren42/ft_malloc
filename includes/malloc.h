@@ -36,7 +36,7 @@ extern "C" {
 
 enum HEAP_TYPE { TINY, SMALL, LARGE };
 
-enum FUNCTION_CALLED { MALLOC, REALLOC, FREE };
+enum FUNCTION_CALLED { MALLOC_FUNC, REALLOC_FUNC, FREE_FUNC };
 
 typedef struct s_chunk t_chunk;
 typedef struct s_free_chunk t_free_chunk;
@@ -108,7 +108,7 @@ t_mem_usage printHeaps(t_heap *heap, const enum HEAP_TYPE heap_type, const bool 
 t_mem_usage addMem(const t_mem_usage a, const t_mem_usage b);
 
 // HEAPS
-t_heap *newHeap(const size_t bytesRequested, const enum HEAP_TYPE heap_type);
+t_heap *newHeap(const enum HEAP_TYPE heap_type, const size_t heapMinSize);
 t_heap **getFirstHeap(const enum HEAP_TYPE heap_type);
 void removeHeap(t_heap *heap);
 

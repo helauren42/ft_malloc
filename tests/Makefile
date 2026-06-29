@@ -55,12 +55,13 @@ speed:
 	$(call end)
 
 dev:
-	cd .. && make re
+	$(call start, error)
 	@echo ""
 	@echo ""
 	@echo ""
 	@c++ -g3 -I ../includes ./src/tester.cpp ./dev/main.cpp $(TEST_NAME) -Wl,-rpath,. \
 	&& LD_LIBRARY_PATH=. ./a.out && $(RM) a.out
+	$(call end)
 
 gdb:
 	@c++ -g3 -I ../includes ./src/tester.cpp ./dev/main.cpp $(TEST_NAME) -Wl,-rpath,.. \
