@@ -45,7 +45,8 @@ fclean: clean
 re: fclean all
 
 42solo:
-	$(call 42testfunc,test4.c)
+	gcc -o test5 ./malloc_docs/test5.c -L. -lft_malloc && ./malloc_docs/run_linux.sh ./test5
+	# $(call 42testfunc,test2.c)
 
 42todos:
 	$(call 42testfunc,test0.c)
@@ -54,7 +55,7 @@ re: fclean all
 	$(call 42testfunc,test3.c)
 	$(call 42testfunc,test4.c)
 	gcc -o test4 ./malloc_docs/test4.c -L. -lft_malloc && ./malloc_docs/run_linux.sh ./test4
-	$(call 42testfunc,test5.c)
+	gcc -o test5 ./malloc_docs/test5.c -L. -lft_malloc && ./malloc_docs/run_linux.sh ./test5
 
 update_source:
 	python ./scripts/update_makefile_srcs.py
