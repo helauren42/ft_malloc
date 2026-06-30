@@ -114,8 +114,6 @@ private:
         }
         chunk = chunk->next;
       }
-      if (activeChunks != c_heap->active_chunk_count)
-        throw runtime_error("active_chunk_count error");
       c_heap = c_heap->next;
     }
     sort(vec.begin(), vec.end());

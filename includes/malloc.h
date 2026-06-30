@@ -67,8 +67,6 @@ typedef struct s_heap {
   t_heap *next;
   t_chunk *first_chunk;
   t_free_chunk *first_free_chunk;
-  unsigned int active_chunk_count; // checked on freeing to know if heap should
-                                   // be unmapped
   size_t size;
 } t_heap;
 

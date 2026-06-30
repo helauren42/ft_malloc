@@ -75,8 +75,6 @@ inline static t_chunk *findChunkInExistingHeaps(const enum HEAP_TYPE heap_type, 
     while (free_chunk) {
       if (free_chunk->payload_bytes >= bytes_needed) {
         t_chunk *new_chunk = unfreeChunk(bytes_needed, free_chunk, heap, heap_type);
-        if (new_chunk)
-          heap->active_chunk_count++;
         debugInfo("Returning allocated chunk");
         return new_chunk;
       }

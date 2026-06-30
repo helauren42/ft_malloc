@@ -45,8 +45,8 @@ fclean: clean
 re: fclean all
 
 42solo:
-	gcc -o test5 ./malloc_docs/test5.c -L. -lft_malloc && ./malloc_docs/run_linux.sh ./test5
-	# $(call 42testfunc,test2.c)
+	# gcc -o test5 ./malloc_docs/test5.c -L. -lft_malloc && ./malloc_docs/run_linux.sh ./test5
+	$(call 42testfunc,test2.c)
 
 42todos:
 	$(call 42testfunc,test0.c)

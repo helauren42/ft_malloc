@@ -59,8 +59,7 @@ void free(void *ptr) {
   pthread_mutex_lock(&g_global.mutex);
   t_heap *heap = chunk->heap;
   debugAddr("start first_free_chunk addr: ", heap->first_free_chunk);
-  heap->active_chunk_count--;
-  if (heap->active_chunk_count == 0 && (heap->next || heap->prev)) {
+  if (heap->first_chunk == NULL && (heap->next || heap->prev)) {
     removeHeap(heap);
     pthread_mutex_unlock(&g_global.mutex);
     return;
