@@ -66,6 +66,9 @@ void reallocCmp(const char *ptr, const char *expected) {
       cout << RED << "Realloc error: " << endl;
       cout << "recv: " << ptr << endl;
       cout << "expc: " << ptr << endl;
+      cout << "index: " << i << endl;
+      // cout << "recv: " << ptr[i] << endl;
+      // cout << "expc: " << ptr[i] << endl;
       exit(1);
     }
   }
@@ -73,23 +76,27 @@ void reallocCmp(const char *ptr, const char *expected) {
 
 void testRealloc() {
   Tester tester = Tester();
-  char *ptr1 = (char *)tester.wrap_malloc(10, NULL);
+  char *ptr1 = (char *)tester.wrap_malloc(50, NULL);
   cout << "1 malloc: " << hex << (uintptr_t)ptr1 << endl;
-  char *ptr2 = (char *)tester.wrap_malloc(10, NULL);
-  char *ptr3 = (char *)tester.wrap_malloc(10, NULL);
-  char *ptr4 = (char *)tester.wrap_malloc(10, NULL);
-  for (int i = 0; i < 10; i++) {
+  char *ptr2 = (char *)tester.wrap_malloc(50, NULL);
+  char *ptr3 = (char *)tester.wrap_malloc(50, NULL);
+  char *ptr4 = (char *)tester.wrap_malloc(50, NULL);
+  for (int i = 0; i < 48; i++) {
     ptr1[i] = 'a';
     ptr2[i] = 'a';
     ptr3[i] = 'a';
     ptr4[i] = 'a';
   }
+  ptr1[48] = 0;
+  ptr2[48] = 0;
+  ptr3[48] = 0;
+  ptr4[48] = 0;
   cout << "\n\n\n\n\n" << "pre realloc" << endl;
-  ptr1 = (char *)tester.wrap_realloc(21, ptr1);
-  ptr2 = (char *)tester.wrap_realloc(21, ptr2);
-  ptr3 = (char *)tester.wrap_realloc(21, ptr3);
-  ptr4 = (char *)tester.wrap_realloc(21, ptr4);
-  const char expected[] = "aaaaaaaaaa";
+  ptr1 = (char *)tester.wrap_realloc(100, ptr1);
+  ptr2 = (char *)tester.wrap_realloc(100, ptr2);
+  ptr3 = (char *)tester.wrap_realloc(100, ptr3);
+  ptr4 = (char *)tester.wrap_realloc(100, ptr4);
+  const char expected[] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
   reallocCmp(ptr1, expected);
   reallocCmp(ptr2, expected);
   reallocCmp(ptr3, expected);
